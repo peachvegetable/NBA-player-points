@@ -1,5 +1,5 @@
 #### Preamble ####
-# Purpose: Models... [...UPDATE THIS...]
+# Purpose: Models generated for predicting students' performances based on aspects like extracurricular_activities, weekly_self_study_hours, etc
 # Author: Yihang Cai
 # Date: 30 Mar 2024
 # Contact: Yihang.cai.nz@gmail.com
@@ -8,10 +8,11 @@
 
 #### Workspace setup ####
 library(tidyverse)
+library(arrow)
 library(rstanarm)
 
 #### Read data ####
-analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
+analysis_data <- read_parquet("data/analysis_data/analysis_data.parquet")
 
 ### Model data ####
 first_model <-
