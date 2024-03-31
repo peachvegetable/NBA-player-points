@@ -1,11 +1,9 @@
 #### Preamble ####
 # Purpose: Models... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
-# License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Author: Yihang Cai
+# Date: 30 Mar 2024
+# Contact: Yihang.cai.nz@gmail.com
+# Any other information needed? Some of the codes are adpated from Telling Stories with Data by Rohan Alexander
 
 
 #### Workspace setup ####
