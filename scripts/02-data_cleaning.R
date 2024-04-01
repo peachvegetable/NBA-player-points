@@ -1,16 +1,25 @@
 #### Preamble ####
-# Purpose: Cleans the raw data of student scores, selecting only the relevant variables in the dataset
+# Purpose: Cleans the raw data of student scores, merge the two files and then selecting only the relevant variables in the dataset
 # Author: Yihang Cai
 # Date: 30 Mar 2024
 # Contact: Yihang.cai.nz@gmail.com
-# Any other information needed? Some of the codes are adpated from Telling Stories with Data by Rohan Alexander
+# Any other information needed? Some of the codes are adapted from Telling Stories with Data by Rohan Alexander
 
 #### Workspace setup ####
 library(tidyverse)
 library(arrow)
 
 #### Clean data ####
-raw_data <- read_csv("data/raw_data/raw_data.csv")
+mat_data <- read_csv("data/raw_data/student_mat.csv")
+por_data <- read_csv("data/raw_data/student_por.csv")
+
+# merge the data, code is adapted from the instruction of data.world
+d1=read.table("student-mat.csv",sep=";",header=TRUE)
+d2=read.table("student-por.csv",sep=";",header=TRUE)
+
+d3=merge(mat_data,d2,by=c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+print(nrow(d3)) # 382 students
+
 
 cleaned_data <-
   raw_data |>

@@ -10,6 +10,7 @@
 library(tidyverse)
 library(arrow)
 library(rstanarm)
+library(rsample)
 
 #### Read data ####
 analysis_data <- read_parquet("data/analysis_data/analysis_data.parquet")
