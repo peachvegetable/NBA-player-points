@@ -12,12 +12,23 @@ library(arrow)
 #### Clean data ####
 raw_data <- read_csv("data/raw_data/raw_data.csv")
 
+# Guards (G): "SG", "PG", "SG-PG", "PG-SG"
+# Forwards (F): "SF", "PF", "PF-SF", "SF-PF", "SF-SG"
+# Centers (C): "C", "PF-C", "C-PF"
+
 cleaned_data <-
   raw_data |>
   janitor::clean_names() |>
-  select(-rk, -tm) |>
+  mutate(broad_position = case_when(
+    pos %in% c("SG", "PG", "SG-PG", "PG-SG") ~ "G",  # Guard
+    pos %in% c("SF", "PF", "PF-SF", "SF-PF", "SF-SG") ~ "F",  # Forward
+    pos %in% c("C", "PF-C", "C-PF") ~ "C"
+    )
+  ) |>
+  select(-rk, -tm, -pos, -fg, -fga, -x3p, -x3pa, -x2p, -x2pa, -ft, -fta) |>
   tidyr::drop_na()
 
+
 #### Save data ####
-write_csv(cleaned_data, "data/analysis_data/analysis_data.csv")
 write_parquet(cleaned_data, "data/analysis_data/analysis_data.parquet")
+
