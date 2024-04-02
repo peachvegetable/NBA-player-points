@@ -13,7 +13,7 @@ library(tidymodels)
 library(arrow)
 
 #### Read data ####
-analysis_data <- read_parquet("data/analysis_data/analysis_data_1.parquet")
+analysis_data <- read_parquet("data/analysis_data/analysis_data.parquet")
 
 ### Model data ####
 
@@ -62,19 +62,9 @@ final_lasso_workflow <- finalize_workflow(
 # fit the model
 first_lasso_model <- fit(final_lasso_workflow, data = train_data)
 
-predictions <- predict(first_lasso_model, test_data)
-results <- bind_cols(test_data, predictions)
-# Calculate RMSE
-rmse_results <- rmse(results, truth = pts, estimate = .pred)
-rsq_results <- rsq(results, truth = pts, estimate = .pred)
+# Second model with feature engineering
 
-
-
-
-
-
-
-analysis_data_1 <- read_parquet("data/analysis_data/analysis_data_1.parquet")
+analysis_data_1 <- read_parquet("data/analysis_data/analysis_data.parquet")
 analysis_data_1$age_squared = analysis_data_1$age^2
 analysis_data_1$pts_per_min = analysis_data_1$pts / analysis_data_1$mp
 analysis_data_1$ast_per_min = analysis_data_1$ast / analysis_data_1$mp
@@ -126,17 +116,16 @@ final_lasso_workflow <- finalize_workflow(
 # fit the model
 second_lasso_model <- fit(final_lasso_workflow, data = train_data)
 
-predictions <- predict(second_lasso_model, test_data)
-results <- bind_cols(test_data, predictions)
-# Calculate RMSE
-rmse_results_2 <- rmse(results, truth = pts, estimate = .pred)
-rsq_results_2 <- rsq(results, truth = pts, estimate = .pred)
-
 
 #### Save model ####
 saveRDS(
   first_lasso_model,
   file = "models/first_lasso_model.rds"
+)
+
+saveRDS(
+  second_lasso_model,
+  file = "models/second_lasso_model.rds"
 )
 
 
