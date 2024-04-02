@@ -36,39 +36,24 @@ The remainder of this paper is structured as follows. @sec-data....
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+The dataset is obtained from Basketball Reference @citeDataset, which contains NBA players' statistics in the 2023 to 2024 season. The dataset is directly downloaded from Basketball Reference using the given instruction. The dataset contains different statistics of NBA players, for instance players' position, age, assists, steals, etc. There are in total of 718 observations before any data cleanings. 
 
-
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
-
-Talk way more about it. 
-
+Since this dataset contains 3-point field goals, 2-point field goals, free throws and field goals, points can be calculated solely using these variables. My goal is to predict a the numebr of scores a NBA player scores based on his performance, which means that these features are too closely related to the target variable (i.e. points). Thus, those variables are removed from the dataset using 'tidyverse' package in R @citeTidyverse. Moreover, there are 12 different positions in the dataset, I categorized them into a broader classification which has only three categories - Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, SF-PF, SF-SG, Centers (C): C, PF-C, C-PF. This is done so that I don't need to create overwhelming dummy variables when generating the model and this process of binning could simplify the model and potentially strengthen the signal by reducing noise and multicollinearity.
 
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+Lasso regression is a variation of linear regressions that can actually perform feature selection by setting the coefficients of less important features to zero. It has an additional parameter $\lambda$, which is the regularization parameter that controls the strength of the penalty. The penalty term shrinks some of the coefficients (i.e. the less important variables) toward zero. As $\lambda$ increases, more coefficients are set to zero, leading to a simpler model. The value of $\lambda$ is determined through cross-validation. 
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
 \begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
+y_i = \beta_0 + \beta_i \cdot X_i
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+In this equation, $y_i$ is the number of points a player scores, which is the dependent variable I am trying to predict. $\beta_0$ is the interception, and $\beta_i$ is a matrix that contains the coefficients $\beta_1, \beta_2, ..., \beta_{18}$ for each predictor that the lasso regression will estimate. $X_i$ is also a matrix contains the predictors: players position, age, games, game starts, minutes played, field goal percentage, 3-point field goal percentage, 2-point field goal percentage, effective field goal percentage, free throw percentage, offensive rebounds, defensive rebounds, total rebounds, assists, steals, blocks, turnovers, and personal fouls. 
 
+We run the model in R [@citeR] using the `tidymodels` package of @citeTidymodels.
 
 ### Model justification
 
@@ -77,11 +62,17 @@ We expect a positive relationship between the size of the wings and time spent a
 We can use maths by including latex between dollar signs, for instance $\theta$.
 
 ```{r}
-predictions <- predict(second_lasso_model, test_data)
-results <- bind_cols(test_data, predictions)
-# Calculate RMSE
-rmse_results_2 <- rmse(results, truth = pts, estimate = .pred)
-rsq_results_2 <- rsq(results, truth = pts, estimate = .pred)
+# #| include: false
+# #| warning: false
+# #| message: false
+# 
+# first_lasso_model <- readRDS("../models/first_lasso_model.rds")
+# second_lasso_model <- readRDS("../models/second_lasso_model.rds")
+# predictions <- predict(second_lasso_model, test_data)
+# results <- bind_cols(test_data, predictions)
+# # Calculate RMSE
+# rmse_results_2 <- rmse(results, truth = pts, estimate = .pred)
+# rsq_results_2 <- rsq(results, truth = pts, estimate = .pred)
 ```
 
 
@@ -116,6 +107,11 @@ Weaknesses and next steps should also be included.
 # Appendix {-}
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+
 analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
 predictors <- c("g", "gs", "mp", "fg_percent", "x3p_percent", 
