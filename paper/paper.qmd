@@ -23,6 +23,8 @@ library(arrow)
 library(tidymodels)
 library(modelsummary)
 library(ggplot2)
+library(knitr)
+library(janitor)
 ```
 
 
@@ -36,9 +38,64 @@ The remainder of this paper is structured as follows. @sec-data....
 
 # Data {#sec-data}
 
-The dataset is obtained from Basketball Reference @citeDataset, which contains NBA players' statistics in the 2023 to 2024 season. The dataset is directly downloaded from Basketball Reference using the given instruction. The dataset contains different statistics of NBA players, for instance players' position, age, assists, steals, etc. There are in total of 718 observations before any data cleanings. 
+The dataset is obtained from Basketball Reference @citeDataset, which contains NBA players' statistics in the 2023 to 2024 season. The dataset is directly downloaded from Basketball Reference using the given instruction. The dataset contains different statistics of NBA players, for instance, players' position, age, assists, steals, etc. There are in total of 718 observations before any data cleanings. 
 
-Since this dataset contains 3-point field goals, 2-point field goals, free throws and field goals, points can be calculated solely using these variables. My goal is to predict a the numebr of scores a NBA player scores based on his performance, which means that these features are too closely related to the target variable (i.e. points). Thus, those variables are removed from the dataset using 'tidyverse' package in R @citeTidyverse. Moreover, there are 12 different positions in the dataset, I categorized them into a broader classification which has only three categories - Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, SF-PF, SF-SG, Centers (C): C, PF-C, C-PF. This is done so that I don't need to create overwhelming dummy variables when generating the model and this process of binning could simplify the model and potentially strengthen the signal by reducing noise and multicollinearity.
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-top5players
+#| tbl-cap: Top 5 NBA Players Based on Select Predictors Highly Correlated with Points Scored, Season 2023-2024
+
+raw_data <- read_csv("../data/raw_data/raw_data.csv")
+
+raw_data |> 
+  drop_na() |>
+  clean_names() |>
+  head(5) |> 
+  select(player, x3p, x2p, ft, pts) |>
+  rename(
+    Player = player,
+    "3-point goals" = x3p,
+    "2-point goals" = x2p,
+    "free throws" = ft,
+    "points" = pts
+  ) |>
+  kable()
+```
+
+
+This dataset contains player statistics including 3-point goals, 2-point goals, field goals, and free throws, points can be calculated using these variables. My goal is to predict the number of points a NBA player scores based on his performance, which means that these features are too closely related to the target variable (i.e. points). @tbl-top5players shows the table with closely related variables, we can calculate the points a player scored directly using these variables. For instance, player Bam Adebayo had 10 3-points goals, 470 2-point goals and 276 free throws during the 2023-2024 season, so his total points gained is $10 \cdot 3 + 470 \cdot 2 + 1 \cdot 276 = 1246$, which is exactly the points he scored. Thus, those variables are removed from the dataset using 'tidyverse' package in R @citeTidyverse. Moreover, there are 12 different positions in the dataset, I categorized them into a broader classification which has only three categories - Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, SF-PF, SF-SG, and Centers (C): C, PF-C, C-PF. This is done so that I don't need to create overwhelming dummy variables when generating the model and this process of binning could simplify the model and potentially strengthen the signal by reducing noise and multicollinearity. Additionally, redundant variables are also removed like 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-top10players
+#| tbl-cap: Top 10 NBA Players with selectely statistics, Season 2023-2024
+
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+analysis_data |>
+  head(10) |>
+  kable()
+```
+
+
+After removing the closely related features, the dataset contains the following variables as @tbl-top10players shows:
+1. player: the player name, which includes the players that played in the 2023-2024 season.
+2. age: the age of each player.
+3. g: games, how many games a player played in this season.
+4. gs: game started, how many games a player has been in the starting lineup for their team at the beginning of the game.
+5. mp: minutes played, the total time of a player played in this season.
+6. fg_percent: field goal percentage, this statistic represents the percentage of field goals (both 2-pointers and 3-pointers) made by a player out of the total number of field goal attempts.
+7. x3p_percent: 3-point goal percentage, this statistic represents the percentage of 3-point field goals made by a player out of the total number of 3-point field goal attempts.
+8. x2p_percent: 2-point goal percentage, this statistic represents the percentage of 2-point field goals made by a player out of the total number of 2-point field goal attempts.
+9. e_fg_percent: effective field goal percentage, this statistic adjusts for the fact that a 3-point field goal is worth more than a 2-point field goal.
+10. ft_percent: free throw percentage, this statistic represents the percentage of free throws made by a player out of the total number of free throw attempts.
+11. orb: offensive rebounds, this statistic represents the number of rebounds grabbed by a player on the offensive end of the court.
+12. drb: defensive rebounds, this statistic represents the number of rebounds grabbed by a player on the defensive end of the court.
+13. trb: total rebounds, this statistic represents the total number of rebounds grabbed by a player (both offensive and defensive rebounds).
 
 
 # Model
@@ -55,7 +112,7 @@ In this equation, $y_i$ is the number of points a player scores, which is the de
 
 We run the model in R [@citeR] using the `tidymodels` package of @citeTidymodels.
 
-### Model justification
+## Model justification
 
 We expect a positive relationship between the size of the wings and time spent aloft. In particular...
 
