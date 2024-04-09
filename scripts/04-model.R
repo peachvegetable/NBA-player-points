@@ -128,3 +128,27 @@ saveRDS(
 )
 
 
+
+library(tidymodels)
+library(broom)
+
+# Extract the fitted model object
+lasso_fit <- extract_fit_parsnip(first_lasso_model)
+
+# Use broom's tidy method on the extracted fit object
+coef_info <- tidy(lasso_fit)
+
+# Now, filter out the intercept and examine the coefficients
+important_predictors <- coef_info %>%
+  filter(term != "(Intercept)") %>%
+  arrange(desc(abs(estimate)))
+
+# View the important predictors
+print(important_predictors)
+
+
+
+
+
+
+

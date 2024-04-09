@@ -137,14 +137,13 @@ We anticipate a positive correlation between the points scored and several facto
 ## Model performance
 
 ```{r}
-#| include: false
+#| echo: false
 #| warning: false
 #| message: false
-#| label: tbl-rmse
-#| tbl-cap: Comparison of Prediction Accuracy for NBA Player Points: Initial vs. Tuned Lasso Models
+#| label: tbl-model1
+#| tbl-cap: First lasso regression model top 10 predictions
 
 first_lasso_model <- readRDS("../models/first_lasso_model.rds")
-second_lasso_model <- readRDS("../models/second_lasso_model.rds")
 
 analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
@@ -154,39 +153,68 @@ data_split <- initial_split(analysis_data, prop = 0.8)
 test_data <- testing(data_split)
 
 # predictions for the first model
-predictions_1 <- predict(first_lasso_model, test_data)
-results_1 <- bind_cols(test_data, predictions_1)
-# Calculate RMSE for the first model
-rmse_results_1 <- rmse(results_1, truth = pts, estimate = .pred)
+predictions <- predict(first_lasso_model, test_data)
+results <- bind_cols(test_data, predictions)
 
-analysis_data_1 <- read_parquet("../data/analysis_data/analysis_data.parquet")
-analysis_data_1$age_squared = analysis_data_1$age^2
-analysis_data_1$pts_per_min = analysis_data_1$pts / analysis_data_1$mp
-analysis_data_1$ast_per_min = analysis_data_1$ast / analysis_data_1$mp
+results |>
+  select(rk, pts, .pred) |>
+  head(10) |>
+  rename(
+    "Rank" = rk,
+    "Points" = pts,
+    "Prediction" = .pred
+    ) |>
+  kable(booktabs = TRUE, digits = 2)
+```
+@tbl-model1 displays the predictions made by the initial lasso regression model for the number of points scored by NBA players, numbered by 'Rank' identifier. For each 'Rank', there are two columns: 'Points', which represents the actual points scored, and 'Prediction', which shows the predicted points scored by the model. It's noticeable that there's a variance between the actual points and the predicted values. The model does not seem to accurately predict the points: In some cases, such as Rank 3, the model overestimates the points, predicting 372.78 points against the actual 274. In other instances, like Rank 7, the prediction is quite close to the actual points scored (1128.62 predicted vs. 1142 actual). There are also underestimations, as seen with Rank 30, where the model predicts 985.43 points while the actual points scored are 1036. 
 
-set.seed(123) # For reproducibility
-data_split <- initial_split(analysis_data_1, prop = 0.8)
-train_data <- training(data_split)
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-model1rmsemae
+#| tbl-cap: First lasso regression model RMSE and MAE
+
+# read in the first lasso model
+first_lasso_model <- readRDS("../models/first_lasso_model.rds")
+
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+# data splitting
+set.seed(321) # For reproducibility
+data_split <- initial_split(analysis_data, prop = 0.8)
 test_data <- testing(data_split)
 
-# predictions for the second model
-predictions_2 <- predict(second_lasso_model, test_data)
-results_2 <- bind_cols(test_data, predictions_2)
+# predictions for the first model
+predictions <- predict(first_lasso_model, test_data)
+results <- bind_cols(test_data, predictions)
 # Calculate RMSE for the first model
-rmse_results_2 <- rmse(results_2, truth = pts, estimate = .pred)
+rmse_results <- rmse(results, truth = pts, estimate = .pred)
+mae_results <- mae(results, pts, .pred)
 
-# Create a data frame with the RMSE values
-rmse_comparison <- data.frame(
-  "Initial Model" = rmse_results_1$.estimate,
-  "Tuned Model" = rmse_results_2$.estimate
+results <- data.frame(
+  "RMSE" = rmse_results$.estimate,
+  "MAE" = mae_results$.estimate
 )
 
-# Set row names to 'RMSE' for clarity
-rownames(rmse_comparison) <- "RMSE"
+rownames(results) <- "First lasso regression model"
 
-# Display the table
-kable(rmse_comparison)
+kable(results, booktabs = TRUE, digits = 2)
 ```
+
+The table @tbl-model1rmsemae lists two error metrics for assessing the first lasso regression model. RMSE(Root Mean Squared Error), recorded at 111.79, captures the average error by squaring the difference between the model's predictions and the actual points, thereby giving more weight to larger discrepancies and making it particularly useful where such errors have greater consequences. MAE(Mean Absolute Error), noted as 80.6, represents the simple average of all prediction errors without emphasis on their size, making it a reliable metric when treating all errors uniformly is preferable. Utilizing both RMSE and MAE provides a dual perspective: RMSE highlights the impact of substantial errors, and MAE offers a clear measure of average error, assisting in a balanced evaluation of the model's performance. This approach to error analysis suggests that the model's predictions could be improved by reevaluating the included features, especially in areas where the model's accuracy is critical.
+
+### Feature engineering
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-model1variables
+#| tbl-cap: First lasso regression model important variables
+
+```
+
 
 # Results
 
