@@ -24,7 +24,7 @@ test_data <- testing(data_split)
 
 # preprocesssing with recipe
 data_recipe <- recipe(pts ~ ., data = train_data) |>
-  step_rm(player) |>
+  step_rm(rk) |>
   step_normalize(all_numeric_predictors()) |>
   step_dummy(broad_position)
 
@@ -63,7 +63,6 @@ final_lasso_workflow <- finalize_workflow(
 first_lasso_model <- fit(final_lasso_workflow, data = train_data)
 
 # Second model with feature engineering
-
 analysis_data_1 <- read_parquet("data/analysis_data/analysis_data.parquet")
 analysis_data_1$age_squared = analysis_data_1$age^2
 analysis_data_1$pts_per_min = analysis_data_1$pts / analysis_data_1$mp
@@ -78,7 +77,7 @@ test_data <- testing(data_split)
 
 # preprocesssing with recipe
 data_recipe <- recipe(pts ~ ., data = train_data) |>
-  step_rm(player) |>
+  step_rm(rk) |>
   step_normalize(all_numeric_predictors()) |>
   step_dummy(broad_position)
 

@@ -40,14 +40,17 @@ The remainder of this paper is structured as follows. @sec-data....
 
 # Data {#sec-data}
 
-The dataset is obtained from Basketball Reference @citeDataset, which contains NBA players' statistics in the 2023 to 2024 season. The dataset is directly downloaded from Basketball Reference using the given instruction. The dataset contains different statistics of NBA players, for instance, players' position, age, assists, steals, etc. There are in total of 718 observations before any data cleanings. 
 
-Raw data is displayed in @sec-raw-data, which is split into four different tables @tbl-tbl1, @tbl-tbl2, @tbl-tbl3, @tbl-tbl4. There are 30 variables in the dataset and each is introduced and explained in @sec-raw-data. 
+The dataset for this analysis was acquired from Basketball Reference @citeDataset and includes a wide range of NBA player statistics for the 2023-2024 season. The process of downloading this dataset involved converting the website's data table into a CSV format, then transferring this data into Excel. In Excel, I employed the 'Text to Columns' feature to separate the statistics using commas, thereby preparing the dataset for analysis. This dataset comprises a variety of player statistics, such as position, age, assists, and steals, with a total of 718 observations before any data cleaning.
+
+The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' @citeTidyverse and 'Janitor' @citeJanitor packages, while 'Dplyr' @citeDplyr was used for data manipulation. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling and model visualization were facilitated by the 'Tidymodels' @citeTidymodels and 'Modelsummary' @citeModelsummary packages, respectively.
+
+The raw data is presented in @sec-raw-data, divided into four separate tables (@tbl-tbl1, @tbl-tbl2, @tbl-tbl3, @tbl-tbl4). The dataset contains 30 variables, each thoroughly introduced and explained in @sec-raw-data, offering a detailed view of the data that forms the basis of this study.
 
 
 ## Data processing and interested predictors
 
-This dataset contains player statistics including 3-point goals, 2-point goals, field goals, and free throws, points can be calculated using these variables. My goal is to predict the number of points a NBA player scores based on his performance, which means that these features are too closely related to the target variable (i.e. points).
+This dataset comprises statistics for players, such as 3-point goals, 2-point goals, field goals, and free throws, from which points can be derived. My objective is to forecast an NBA player's total points based on their performance metrics, indicating a direct correlation between these features and the target variable, namely, points.
 
 ```{r}
 #| echo: false
@@ -56,8 +59,10 @@ This dataset contains player statistics including 3-point goals, 2-point goals, 
 #| label: tbl-top5players
 #| tbl-cap: Top 5 NBA Players Based on Select Predictors Highly Correlated with Points Scored, Season 2023-2024
 
+# read in the raw_data
 raw_data <- read_csv("../data/raw_data/raw_data.csv")
 
+# cleans the raw_data for universal variable name and then make a table using kable function
 raw_data |> 
   drop_na() |>
   clean_names() |>
@@ -86,8 +91,10 @@ Additionally, I re-evaluated the necessity of certain variables such as 'trb' (t
 #| label: tbl-top10players
 #| tbl-cap: Top 10 NBA Players with selectely statistics, Season 2023-2024
 
+# read in the analysis_data
 analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
+# show the first 10 players, and then rename some of the variables for a better view, and set the digits to two d.p. for a better view
 analysis_data |>
   head(10) |>
   rename(
@@ -102,12 +109,16 @@ analysis_data |>
   kable(digits = 2)
 ```
 
-As @tbl-top10players shows, apart from 'rk' for identification purpose, these variables are what we interested in and will be used as predictors to predict the total points a player would potentially gain based on his performances like 3-point goal percentage, position and etc. 
+As illustrated in @tbl-top10players, aside from 'rk' serving as an identifier, the selected variables are central to our analysis. These will act as predictors for estimating a player's total points, considering factors such as 3-point goal percentage, position, among others. Furthermore, for enhanced clarity, the values in the tables have been formatted to display two decimal places.
 
 
 # Model
 
-Lasso regression is a variation of linear regressions that can actually perform feature selection by setting the coefficients of less important features to zero. It has an additional parameter $\lambda$, which is the regularization parameter that controls the strength of the penalty. The penalty term shrinks some of the coefficients (i.e. the less important variables) toward zero. As $\lambda$ increases, more coefficients are set to zero, leading to a simpler model. The value of $\lambda$ is determined through cross-validation. 
+This model pursues two main aims. The initial goal is to predict the total points an NBA player might score based on various performance indicators such as position and shooting efficiency. The second goal is to identify which predictors most significantly affect a player's scoring ability. For example, it is assumed that more playtime within a season could lead to a higher score.
+
+To meet these objectives, the lasso regression model is chosen for its unique features: First, with 19 predictors left after processing the data, the lasso regression can reduce the influence of less important predictors by setting their coefficients to zero. Second, it clearly indicates which predictors have a greater impact on the scoring outcome, helping to understand what factors are most important in determining a player's points.
+
+Lasso regression, a variant of linear regression models, is notable for its ability to select features by reducing the coefficients of less critical features to zero. This model introduces a regularization parameter, $\lambda$, which determines the strength of the penalty. This penalty minimizes some coefficients, especially those for less important variables, towards zero. As $\lambda$ increases, more coefficients are reduced to zero, leading to a simpler model. The optimal value for $\lambda$ is determined through cross-validation, ensuring the model is effectively tuned for the predictive tasks.
 
 ## Model set-up
 
@@ -121,28 +132,64 @@ We run the model in R [@citeR] using the `tidymodels` package of @citeTidymodels
 
 ## Model justification
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+We anticipate a positive correlation between the points scored and several factors: age, minutes played, number of games played, games started, shooting efficiency (encompassed by 2-point goal percentage, 3-point goal percentage, field goal percentage, and free throw percentage), rebounds (both offensive and defensive), and assists. The logic is straightforward: the higher these variables, the greater the likelihood of scoring more points. Additionally, a player's position could influence their scoring, as different positions in basketball have distinct objectives; for instance, center(C) may prioritize defense over scoring.
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
+## Model performance
 
 ```{r}
-# #| include: false
-# #| warning: false
-# #| message: false
-# 
-# first_lasso_model <- readRDS("../models/first_lasso_model.rds")
-# second_lasso_model <- readRDS("../models/second_lasso_model.rds")
-# predictions <- predict(second_lasso_model, test_data)
-# results <- bind_cols(test_data, predictions)
-# # Calculate RMSE
-# rmse_results_2 <- rmse(results, truth = pts, estimate = .pred)
-# rsq_results_2 <- rsq(results, truth = pts, estimate = .pred)
-```
+#| include: false
+#| warning: false
+#| message: false
+#| label: tbl-rmse
+#| tbl-cap: Comparison of Prediction Accuracy for NBA Player Points: Initial vs. Tuned Lasso Models
 
+first_lasso_model <- readRDS("../models/first_lasso_model.rds")
+second_lasso_model <- readRDS("../models/second_lasso_model.rds")
+
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+# data splitting
+set.seed(321) # For reproducibility
+data_split <- initial_split(analysis_data, prop = 0.8)
+test_data <- testing(data_split)
+
+# predictions for the first model
+predictions_1 <- predict(first_lasso_model, test_data)
+results_1 <- bind_cols(test_data, predictions_1)
+# Calculate RMSE for the first model
+rmse_results_1 <- rmse(results_1, truth = pts, estimate = .pred)
+
+analysis_data_1 <- read_parquet("../data/analysis_data/analysis_data.parquet")
+analysis_data_1$age_squared = analysis_data_1$age^2
+analysis_data_1$pts_per_min = analysis_data_1$pts / analysis_data_1$mp
+analysis_data_1$ast_per_min = analysis_data_1$ast / analysis_data_1$mp
+
+set.seed(123) # For reproducibility
+data_split <- initial_split(analysis_data_1, prop = 0.8)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+
+# predictions for the second model
+predictions_2 <- predict(second_lasso_model, test_data)
+results_2 <- bind_cols(test_data, predictions_2)
+# Calculate RMSE for the first model
+rmse_results_2 <- rmse(results_2, truth = pts, estimate = .pred)
+
+# Create a data frame with the RMSE values
+rmse_comparison <- data.frame(
+  "Initial Model" = rmse_results_1$.estimate,
+  "Tuned Model" = rmse_results_2$.estimate
+)
+
+# Set row names to 'RMSE' for clarity
+rownames(rmse_comparison) <- "RMSE"
+
+# Display the table
+kable(rmse_comparison)
+```
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
 
 
 
