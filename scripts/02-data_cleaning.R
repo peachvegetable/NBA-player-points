@@ -25,7 +25,7 @@ cleaned_data <-
     pos %in% c("C", "PF-C", "C-PF") ~ "C"
     )
   ) |>
-  select(-rk, -tm, -pos, -fg, -fga, -x3p, -x3pa, -x2p, -x2pa, -ft, -fta) |>
+  select(-player, -tm, -pos, -fg, -fga, -x3p, -x3pa, -x2p, -x2pa, -ft, -fta, -trb) |>
   tidyr::drop_na()
 
 

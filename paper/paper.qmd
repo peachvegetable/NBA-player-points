@@ -9,6 +9,7 @@ date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
 format: pdf
 number-sections: true
+toc: true
 bibliography: references.bib
 ---
 
@@ -25,12 +26,13 @@ library(modelsummary)
 library(ggplot2)
 library(knitr)
 library(janitor)
+library(kableExtra)
 ```
 
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+You can and should cross-reference sections and sub-sections. We use @citeR and @citeRohan.
 
 The remainder of this paper is structured as follows. @sec-data....
 
@@ -39,6 +41,13 @@ The remainder of this paper is structured as follows. @sec-data....
 # Data {#sec-data}
 
 The dataset is obtained from Basketball Reference @citeDataset, which contains NBA players' statistics in the 2023 to 2024 season. The dataset is directly downloaded from Basketball Reference using the given instruction. The dataset contains different statistics of NBA players, for instance, players' position, age, assists, steals, etc. There are in total of 718 observations before any data cleanings. 
+
+Raw data is displayed in @sec-raw-data, which is split into four different tables @tbl-tbl1, @tbl-tbl2, @tbl-tbl3, @tbl-tbl4. There are 30 variables in the dataset and each is introduced and explained in @sec-raw-data. 
+
+
+## Data processing and interested predictors
+
+This dataset contains player statistics including 3-point goals, 2-point goals, field goals, and free throws, points can be calculated using these variables. My goal is to predict the number of points a NBA player scores based on his performance, which means that these features are too closely related to the target variable (i.e. points).
 
 ```{r}
 #| echo: false
@@ -64,8 +73,11 @@ raw_data |>
   kable()
 ```
 
+In @tbl-top5players, we see variables that are directly linked to a player's total points scored. For example, considering Bam Adebayo's performance in the 2023-2024 season: he scored 10 three-pointers, made 470 two-pointers, and successfully shot 276 free throws, totaling $10 \times 3 + 470 \times 2 + 276 \times 1 = 1246$ points, which exactly matches his recorded total points. To streamline the dataset for analysis, I utilized the 'tidyverse' package in R to remove these variables, which are 'fg', 'fga', 'x3p', 'x3pa', 'x2p', 'x2pa', 'ft', and 'fta'.
 
-This dataset contains player statistics including 3-point goals, 2-point goals, field goals, and free throws, points can be calculated using these variables. My goal is to predict the number of points a NBA player scores based on his performance, which means that these features are too closely related to the target variable (i.e. points). @tbl-top5players shows the table with closely related variables, we can calculate the points a player scored directly using these variables. For instance, player Bam Adebayo had 10 3-points goals, 470 2-point goals and 276 free throws during the 2023-2024 season, so his total points gained is $10 \cdot 3 + 470 \cdot 2 + 1 \cdot 276 = 1246$, which is exactly the points he scored. Thus, those variables are removed from the dataset using 'tidyverse' package in R @citeTidyverse. Moreover, there are 12 different positions in the dataset, I categorized them into a broader classification which has only three categories - Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, SF-PF, SF-SG, and Centers (C): C, PF-C, C-PF. This is done so that I don't need to create overwhelming dummy variables when generating the model and this process of binning could simplify the model and potentially strengthen the signal by reducing noise and multicollinearity. Additionally, redundant variables are also removed like 
+The dataset initially detailed players across 12 unique positions, which was quite detailed for modeling purposes. To simplify, I grouped these positions into three main categories: Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, and Centers (C): C, PF-C, C-PF. This grouping was intended to make the model clearer and to potentially improve its predictive power by reducing unnecessary complexity and avoiding overlap in variables.
+
+Additionally, I re-evaluated the necessity of certain variables such as 'trb' (total rebounds), 'player', and 'tm' (team). 'trb', being the sum of 'orb' (offensive rebounds) and 'drb' (defensive rebounds), didn't provide additional insight and was thus omitted. The 'player' variable was removed in favor of 'rk' (rank), which sufficed for identifying players without duplicating information. Lastly, the 'tm' variable was excluded as the analysis didn't focus on team-specific performance, making the team data unnecessary for this study.
 
 ```{r}
 #| echo: false
@@ -78,24 +90,19 @@ analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
 analysis_data |>
   head(10) |>
-  kable()
+  rename(
+    'fg%' = fg_percent,
+    'x3p%' = x3p_percent,
+    'x2p%' = x2p_percent,
+    'efg%' = e_fg_percent,
+    'fg%' = fg_percent,
+    'ft%' = ft_percent,
+    'pos' = broad_position
+  ) |>
+  kable(digits = 2)
 ```
 
-
-After removing the closely related features, the dataset contains the following variables as @tbl-top10players shows:
-1. player: the player name, which includes the players that played in the 2023-2024 season.
-2. age: the age of each player.
-3. g: games, how many games a player played in this season.
-4. gs: game started, how many games a player has been in the starting lineup for their team at the beginning of the game.
-5. mp: minutes played, the total time of a player played in this season.
-6. fg_percent: field goal percentage, this statistic represents the percentage of field goals (both 2-pointers and 3-pointers) made by a player out of the total number of field goal attempts.
-7. x3p_percent: 3-point goal percentage, this statistic represents the percentage of 3-point field goals made by a player out of the total number of 3-point field goal attempts.
-8. x2p_percent: 2-point goal percentage, this statistic represents the percentage of 2-point field goals made by a player out of the total number of 2-point field goal attempts.
-9. e_fg_percent: effective field goal percentage, this statistic adjusts for the fact that a 3-point field goal is worth more than a 2-point field goal.
-10. ft_percent: free throw percentage, this statistic represents the percentage of free throws made by a player out of the total number of free throw attempts.
-11. orb: offensive rebounds, this statistic represents the number of rebounds grabbed by a player on the offensive end of the court.
-12. drb: defensive rebounds, this statistic represents the number of rebounds grabbed by a player on the defensive end of the court.
-13. trb: total rebounds, this statistic represents the total number of rebounds grabbed by a player (both offensive and defensive rebounds).
+As @tbl-top10players shows, apart from 'rk' for identification purpose, these variables are what we interested in and will be used as predictors to predict the total points a player would potentially gain based on his performances like 3-point goal percentage, position and etc. 
 
 
 # Model
@@ -163,50 +170,169 @@ Weaknesses and next steps should also be included.
 
 # Appendix {-}
 
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-
-analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
-
-predictors <- c("g", "gs", "mp", "fg_percent", "x3p_percent", 
-                "x2p_percent", "e_fg_percent", "ft_percent", 
-                "orb", "drb", "trb", "ast", "stl", "blk", "tov", "pf")
-
-for (predictor in predictors) {
-  p <- ggplot(analysis_data, aes_string(x = predictor, y = "pts")) + 
-    geom_point(alpha = 0.5) + 
-    geom_smooth(method = "lm", se = FALSE, color = "blue") + 
-    ggtitle(paste("Points vs", predictor)) +
-    theme_minimal()
-  
-  print(p)
-}
-```
-
-
-
 # Additional data details
 
-# Model details {#sec-model-details}
+## Raw data {#sec-raw-data}
+raw data from basketball reference is split into four tables for a better view, which are displayed below
 
-## Posterior predictive check
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-tbl1
+#| tbl-cap: Basic information and overall performance
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+# read raw_data from the folder
+raw_data <- read_parquet("../data/raw_data/raw_data.parquet")
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+# clean it
+raw_data <- raw_data |> 
+  drop_na() |>
+  clean_names()
 
 
+# splitting the raw_data to 4 tables for a better view
+tbl1 <- raw_data |>
+  select(rk, player, pos, age, tm, g, gs, mp, pts) |>
+  head(5) |>
+  kable()
 
+tbl1
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-tbl2
+#| tbl-cap: Shooting efficiency
+
+# read raw_data from the folder
+raw_data <- read_parquet("../data/raw_data/raw_data.parquet")
+
+# clean it
+raw_data <- raw_data |> 
+  drop_na() |>
+  clean_names()
+
+
+# splitting the raw_data to 4 tables for a better view
+tbl2 <- raw_data |>
+  select(player, fg, fga, fg_percent, x3p, x3pa, x3p_percent, x2p, x2pa, x2p_percent, e_fg_percent) |>
+  head(5) |>
+  kable()
+
+tbl2
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-tbl3
+#| tbl-cap: Free throws and rebounds
+
+# read raw_data from the folder
+raw_data <- read_parquet("../data/raw_data/raw_data.parquet")
+
+# clean it
+raw_data <- raw_data |> 
+  drop_na() |>
+  clean_names()
+
+
+# splitting the raw_data to 4 tables for a better view
+tbl3 <- raw_data |>
+  select(player, ft, fta, ft_percent, orb, drb, trb) |>
+  head(5) |>
+  kable()
+
+tbl3
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-tbl4
+#| tbl-cap: Playmaking and defence
+
+# read raw_data from the folder
+raw_data <- read_parquet("../data/raw_data/raw_data.parquet")
+
+# clean it
+raw_data <- raw_data |> 
+  drop_na() |>
+  clean_names()
+
+
+# splitting the raw_data to 4 tables for a better view
+tbl4 <- raw_data |>
+  select(player, ast, stl, blk, tov, pf) |>
+  head(5) |>
+  kable()
+
+tbl4
+```
+
+1. rk: rank - this doesn't represent the ranking of players based on some criterion, but purely for numbering purpose
+2. player: player - the name of the basketball player.
+
+3. pos: position - the playing position of the player.
+
+4. age: the age of each player.
+
+5. tm: team - the abbreviation of the NBA team the player belongs to.
+
+6. g: games - how many games a player played in this season.
+
+7. gs: game started - how many games a player has been in the starting lineup for their team at the beginning of the game.
+
+8. mp: minutes played - the total time of a player played in this season.
+
+9. fg: field goals - the total number of field goals (baskets) the player has made.
+
+10. fga: field goal attempts - the total number of field goal shots the player has attempted.
+
+11. fg_percent: field goal percentage - this statistic represents the percentage of field goals (both 2-pointers and 3-pointers) made by a player out of the total number of field goal attempts.
+
+12. x3p: 3-point field goals - the total number of 3-point field goals the player has made.
+
+13. x3pa: 3-point field goal attempts - the total number of 3-point shots the player has attempted.
+
+14. x3p_percent: 3-point goal percentage - this statistic represents the percentage of 3-point field goals made by a player out of the total number of 3-point field goal attempts.
+
+15. x2p: 2-point field goals - the total number of 2-point field goals the player has made.
+
+16. x2pa: 2-point field goal attempts - the total number of 2-point shots the player has attempted.
+
+17. x2p_percent: 2-point goal percentage - this statistic represents the percentage of 2-point field goals made by a player out of the total number of 2-point field goal attempts.
+
+18. e_fg_percent: effective field goal percentage - this statistic adjusts for the fact that a 3-point field goal is worth more than a 2-point field goal.
+
+19. ft: free throws - the total number of free throws the player has made.
+
+20: fta: free throw attempts - the total number of free throw shots the player has attempted.
+
+21. ft_percent: free throw percentage - this statistic represents the percentage of free throws made by a player out of the total number of free throw attempts.
+
+22. orb: offensive rebounds - this statistic represents the number of rebounds grabbed by a player on the offensive end of the court.
+
+23. drb: defensive rebounds - this statistic represents the number of rebounds grabbed by a player on the defensive end of the court.
+
+24. trb: total rebounds - this statistic represents the total number of rebounds grabbed by a player (both offensive and defensive rebounds).
+
+25. ast: assists - the total number of assists the player has made, indicating the number of times a player's pass led directly to a basket by a teammate.
+
+26. stl: steals - the total number of times the player has taken the ball away from an opponent, leading to a change in possession.
+
+27. blk: blocks - the total number of times the player has deflected an opponent's filed goal attempt, preventing the ball from going into the basket.
+
+28. tov: turnovers - the total number of times the player has lost possession of the ball to the opposing team.
+
+29. pf: personal fouls - the total number of personal fouls the player has committed.
+
+30: pts: points - the total number of points the player has scored.
 
 
 \newpage
