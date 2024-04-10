@@ -43,7 +43,7 @@ The remainder of this paper is structured as follows. @sec-data....
 
 The dataset for this analysis was acquired from Basketball Reference @citeDataset and includes a wide range of NBA player statistics for the 2023-2024 season. The process of downloading this dataset involved converting the website's data table into a CSV format, then transferring this data into Excel. In Excel, I employed the 'Text to Columns' feature to separate the statistics using commas, thereby preparing the dataset for analysis. This dataset comprises a variety of player statistics, such as position, age, assists, and steals, with a total of 718 observations before any data cleaning.
 
-The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' @citeTidyverse and 'Janitor' @citeJanitor packages, while 'Dplyr' @citeDplyr was used for data manipulation. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling and model visualization were facilitated by the 'Tidymodels' @citeTidymodels and 'Modelsummary' @citeModelsummary packages, respectively.
+The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' @citeTidyverse and 'Janitor' @citeJanitor packages, while 'Dplyr' @citeDplyr and 'Broom' @citeBroom were used for data manipulation and data frame visualization. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling and model visualization were facilitated by the 'Tidymodels' @citeTidymodels and 'Modelsummary' @citeModelsummary packages, respectively.
 
 The raw data is presented in @sec-raw-data, divided into four separate tables (@tbl-tbl1, @tbl-tbl2, @tbl-tbl3, @tbl-tbl4). The dataset contains 30 variables, each thoroughly introduced and explained in @sec-raw-data, offering a detailed view of the data that forms the basis of this study.
 
@@ -213,6 +213,27 @@ The table @tbl-model1rmsemae lists two error metrics for assessing the first las
 #| label: tbl-model1variables
 #| tbl-cap: First lasso regression model important variables
 
+first_lasso_model <- readRDS("../models/first_lasso_model.rds")
+
+# Extract the fitted model object
+lasso_fit <- extract_fit_parsnip(first_lasso_model)
+
+# Use broom's tidy method on the extracted fit object
+coef_info <- tidy(lasso_fit)
+
+# Now, filter out the intercept and examine the coefficients
+important_predictors <- coef_info |>
+  filter(term != "(Intercept)") |>
+  arrange(desc(abs(estimate)))
+
+# View the important predictors
+important_predictors |>
+  select(-penalty) |>
+  rename(
+    "Predictors" = term,
+    "Coefficients" = estimate
+  ) |>
+  kable(booktabs = TRUE, digits = 2)
 ```
 
 
