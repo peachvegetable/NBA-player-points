@@ -287,12 +287,10 @@ As shown in @tbl-model2rmsemae, the second lasso regression model, enhanced with
 
 # Results
 
-For the Results section of your paper based on the rubric and the information provided, you should aim to present a clear, concise, and informative summary of the findings from your lasso regression model analysis. Here are structured suggestions on how to frame your Results section effectively:
-
 Results Section Framework:
 Overview of Model Performance:
 
-Start by summarizing the overall performance of your final lasso regression model. Mention the improvement in the error metrics (RMSE and MAE) after the feature engineering, highlighting how these changes have enhanced the model's predictive accuracy.
+Start by summarizing the overall performance of the final lasso regression model. Mention the improvement in the error metrics (RMSE and MAE) after the feature engineering, highlighting how these changes have enhanced the model's predictive accuracy.
 Example: "The refinement of the lasso regression model through targeted feature engineering significantly enhanced its predictive accuracy. The RMSE decreased from 111.7 to 94.68, and the MAE improved from 80.6 to 66.14, indicating a more precise model in predicting NBA players' points based on performance metrics."
 Detailed Results from Predictive Analysis:
 
