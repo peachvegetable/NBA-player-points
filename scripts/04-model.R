@@ -64,9 +64,13 @@ first_lasso_model <- fit(final_lasso_workflow, data = train_data)
 
 # Second model with feature engineering
 analysis_data_1 <- read_parquet("data/analysis_data/analysis_data.parquet")
-analysis_data_1$age_squared = analysis_data_1$age^2
-analysis_data_1$pts_per_min = analysis_data_1$pts / analysis_data_1$mp
-analysis_data_1$ast_per_min = analysis_data_1$ast / analysis_data_1$mp
+analysis_data_1 <- analysis_data_1 |>
+  mutate(
+    points_per_min = pts / mp,
+    tov_per_game = tov /g,
+    pf_per_game = pf / g
+  )
+
 
 ### Model data ####
 
@@ -115,6 +119,18 @@ final_lasso_workflow <- finalize_workflow(
 # fit the model
 second_lasso_model <- fit(final_lasso_workflow, data = train_data)
 
+predictions <- predict(second_lasso_model, test_data)
+results <- bind_cols(test_data, predictions)
+# Calculate RMSE for the first model
+rmse_results <- rmse(results, truth = pts, estimate = .pred)
+mae_results <- mae(results, pts, .pred)
+
+results <- data.frame(
+  "RMSE" = rmse_results$.estimate,
+  "MAE" = mae_results$.estimate
+)
+
+results
 
 #### Save model ####
 saveRDS(
