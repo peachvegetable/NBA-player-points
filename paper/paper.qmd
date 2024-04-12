@@ -26,7 +26,6 @@ library(modelsummary)
 library(ggplot2)
 library(knitr)
 library(janitor)
-library(kableExtra)
 ```
 
 
@@ -173,7 +172,7 @@ results |>
 #| warning: false
 #| message: false
 #| label: tbl-model1rmsemae
-#| tbl-cap: First lasso regression model RMSE and MAE
+#| tbl-cap: RMSE and MAE of first lasso regression model 
 
 # read in the first lasso model
 first_lasso_model <- readRDS("../models/first_lasso_model.rds")
@@ -237,13 +236,85 @@ important_predictors |>
   kable(booktabs = TRUE, digits = 2)
 ```
 
-@tbl-modelvariables lists the predictors with the highest magnitude coefficients from the lasso regression model, indicating their relative importance in predicting the outcome variable. The listed predictors are minutes played ('mp'), turnovers ('tov'), defensive rebounds ('drb'), offensive rebounds ('orb'), and personal fouls ('pf'), with their corresponding coefficients. 
+@tbl-model1variables lists the predictors with the highest magnitude coefficients from the lasso regression model, indicating their relative importance in predicting the outcome variable. The listed predictors are minutes played ('mp'), turnovers ('tov'), defensive rebounds ('drb'), offensive rebounds ('orb'), and personal fouls ('pf'), with their corresponding coefficients. 
 
-Minutes Played (310.86): The positive coefficient suggests a strong positive relationship between the number of minutes a player plays and their point total. More minutes played typically allows more opportunities to score points. Turnovers (225.98): The positive coefficient here is interesting as turnovers are generally negative events. However, it might indicate that players who are more involved in the game (and therefore more likely to score points) also have more turnovers. Defensive Rebounds (73.62): A positive coefficient for defensive rebounds implies players who gather more rebounds on the defensive end also tend to score more points, possibly due to the additional possessions they secure for their team. Offensive Rebounds (-70.80): The negative coefficient for offensive rebounds suggests that players who get more offensive rebounds do not necessarily score more points. This could reflect a role specialization where some players focus on rebounding rather than scoring. Personal Fouls (-65.66): The negative coefficient indicates that players who commit more fouls tend to score fewer points. This could be because committing fouls may limit a player's time on the court due to foul trouble.
+The coefficient for 'mp' is positive (310.86), highlighting a direct relationship with point totals — more minutes played usually provides more opportunities for scoring. In contrast, 'orb' has a negative coefficient (-70.80), hinting at players with high offensive rebounds not necessarily correlating with higher points, perhaps indicating a focus on rebounding over scoring. 'Tov' carries a positive coefficient (225.98), which might seem counterintuitive given turnovers are adverse events; yet, it could reflect that players who handle the ball frequently might incur more turnovers and also have more scoring chances. A positive coefficient for 'drb' (73.62) suggests a link between securing defensive rebounds and higher point scores, likely due to the additional possessions gained. 'Pf' shows a negative coefficient (-65.66), indicating that fouling frequently could decrease a player's scoring by reducing playing time due to foul trouble.
+
+To refine the model, feature engineering introduced the 'pts_per_min' predictor, combining points with minutes played to assess scoring efficiency. This reflects how well players score relative to their time on the court. 'tov_per_game' adjusts turnovers for the number of games, enabling a fairer comparison across players, and 'pf_per_game' computes the average fouls per game, a significant aspect in evaluating defensive conduct and the potential impact on game participation and point contribution. These engineered features aim to provide a clearer understanding of each player's performance, leading to an improved model with lower error metrics.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-model2rmsemae
+#| tbl-cap: RMSE and MAE of finalized lasso regression model 
+
+# read in the first lasso model
+second_lasso_model <- readRDS("../models/second_lasso_model.rds")
+
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+analysis_data <- analysis_data |>
+  mutate(
+    pts_per_min = pts / mp,
+    tov_per_game = tov /g,
+    pf_per_game = pf / g
+  )
+
+# data splitting
+set.seed(123) # For reproducibility
+data_split <- initial_split(analysis_data, prop = 0.8)
+test_data <- testing(data_split)
+
+# predictions for the first model
+predictions <- predict(second_lasso_model, test_data)
+results <- bind_cols(test_data, predictions)
+# Calculate RMSE for the first model
+rmse_results <- rmse(results, truth = pts, estimate = .pred)
+mae_results <- mae(results, pts, .pred)
+
+results <- data.frame(
+  "RMSE" = rmse_results$.estimate,
+  "MAE" = mae_results$.estimate
+)
+
+rownames(results) <- "Second lasso regression model"
+
+kable(results, booktabs = TRUE, digits = 2)
+```
+
+As shown in @tbl-model2rmsemae, the second lasso regression model, enhanced with engineered features, has demonstrated significant improvement. The RMSE has decreased from 111.7 to 94.68, and the MAE has dropped from 80.6 to 66.14. This reduction in both metrics indicates that the model now predicts the number of points an NBA player could score based on their performances with greater precision.
 
 # Results
 
+For the Results section of your paper based on the rubric and the information provided, you should aim to present a clear, concise, and informative summary of the findings from your lasso regression model analysis. Here are structured suggestions on how to frame your Results section effectively:
 
+Results Section Framework:
+Overview of Model Performance:
+
+Start by summarizing the overall performance of your final lasso regression model. Mention the improvement in the error metrics (RMSE and MAE) after the feature engineering, highlighting how these changes have enhanced the model's predictive accuracy.
+Example: "The refinement of the lasso regression model through targeted feature engineering significantly enhanced its predictive accuracy. The RMSE decreased from 111.7 to 94.68, and the MAE improved from 80.6 to 66.14, indicating a more precise model in predicting NBA players' points based on performance metrics."
+Detailed Results from Predictive Analysis:
+
+Present specific results, such as how well the model predicted points for different players or player types. If applicable, include comparisons to show the model's performance before and after feature engineering.
+Example: "Detailed analysis reveals that the model, after enhancements, provides a more accurate prediction across a range of player performance indicators, such as minutes played and turnovers. The incorporation of efficiency metrics like points per minute played ('pts_per_min') significantly contributed to this improvement."
+Statistical Significance and Confidence:
+
+Discuss any statistical tests or confidence intervals used to ascertain the reliability of the model's predictions. This could involve discussing p-values for coefficients or the confidence in the model's error metrics.
+Example: "Statistical tests affirm the significance of newly integrated predictors, with p-values well below the conventional threshold of 0.05, thereby reinforcing confidence in the model's enhancements."
+Visualization of Results:
+
+If visual aids (such as plots or charts) were used to illustrate the model's performance or to compare the predicted vs. actual points, briefly describe these visualizations and their outcomes.
+Example: "Graphical representations, included in fig-predictions, show a tight correlation between the model's predictions and the actual points scored, especially after the feature engineering phase."
+Summary of Key Findings:
+
+Conclude with a summary of the most critical findings from the model's application, emphasizing how these insights support the model's utility in a real-world context.
+Example: "The results confirm that the enhanced lasso regression model not only predicts the point outcomes with greater accuracy but also highlights the importance of game participation metrics such as minutes played and turnovers in determining a player's scoring potential."
+Additional Tips:
+Clarity and Precision: Keep the language clear and precise, focusing on what the reader needs to understand about the model's performance and the significance of the results.
+Referencing Tables/Graphs: Ensure to reference any tables or graphs from your analysis that support your results. This helps in validating your claims and provides a visual or tabular anchor for your findings.
+Contextualization: Briefly relate your findings to the broader context of sports analytics, perhaps suggesting how these insights could influence team strategy or player evaluation.
+This structure and approach should align with the academic standards outlined in the rubric, ensuring that your Results section is not only informative but also well-integrated with the rest of your paper.
 
 
 
