@@ -1,12 +1,12 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "More Minutes, More Points — The Role of Aggressive Play in NBA Scoring Trends"
+subtitle: "An Analysis of NBA Player Performance Using Lasso Regression for the 2023-2024 Season"
 author: 
   - Yihang  Cai
 thanks: "Code and data are available at: https://github.com/peachvegetable/NBA-player-points"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This study applies lasso regression to predict NBA players' total points from performance metrics during the 2023-2024 season, focusing on variables such as minutes played, turnovers, and personal fouls. It was found that not only expected predictors like minutes played but also turnovers significantly affect scoring outcomes, indicating that players who engage more in the game, despite committing turnovers, tend to score higher. These insights emphasize the complex interplay between aggressive playing styles and scoring achievements. This research enriches our understanding of player performance dynamics, providing valuable knowledge for team management, player assessment, and the broader field of sports analytics."
 format: pdf
 number-sections: true
 toc: true
@@ -31,11 +31,19 @@ library(janitor)
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @citeRohan.
+Professional basketball is not just a display of athletic skill and competition but also a valuable area for data analysis, especially in predicting player performances. This paper examines NBA player statistics from the 2023-2024 season, aiming to predict players' total points using various performance metrics. The study utilizes lasso regression, a statistical method appreciated for its feature selection and regularization capabilities, to enhance the accuracy and simplicity of our predictive model.
 
-The remainder of this paper is structured as follows. @sec-data....
+This research addresses the need for a predictive model that accurately forecasts player points while demonstrating the effects of different performance metrics on scoring. The main objective is to develop a reliable model that can quantify how specific metrics influence the total points scored by NBA players.
 
+In pursuit of this goal, the paper investigates several performance indicators such as minutes played, turnovers, rebounds, and personal fouls. Through feature engineering, these metrics are optimized for their relevance in predicting player scores. The study details the rationale behind selecting lasso regression, which reduces the influence of less critical metrics, thereby focusing on the most impactful factors.
 
+The findings highlight that common metrics like minutes played are significant predictors of scoring potential. Interestingly, it also shows that turnovers have a positive correlation with scoring, suggesting that players involved in aggressive offensive plays tend to score higher, despite the potential risks.
+
+These insights are vital for team strategies and player assessments and broaden the application of statistical models in sports science. They offer both theoretical and applied insights into the complex dynamics of basketball performance.
+
+The estimand of this study, the total points a player scores, is predicted based on various processed performance metrics using lasso regression. This focus is crucial to achieving the study's goals of enhancing predictive precision and understanding how different metrics influence scoring in NBA games.
+
+The paper is structured as follows: @sec-data covers the data collection and preparation methods; @sec-model explains the model setup, justification, and evaluation of its performance; @sec-results discusses the results; and @sec-discussion interprets these results comprehensively. Appendix provides additional data details, rounding out the discussion and ensuring thorough documentation of all methods and analyses used.
 
 # Data {#sec-data}
 
@@ -111,7 +119,7 @@ analysis_data |>
 As illustrated in @tbl-top10players, aside from 'rk' serving as an identifier, the selected variables are central to our analysis. These will act as predictors for estimating a player's total points, considering factors such as 3-point goal percentage, position, among others. Furthermore, for enhanced clarity, the values in the tables have been formatted to display two decimal places.
 
 
-# Model {#sec-Model}
+# Model {#sec-model}
 
 This model pursues two main goals. The initial goal is to predict the total points an NBA player might score based on various performance indicators such as position and shooting efficiency. The second goal is to identify which predictors most significantly affect a player's scoring ability. For example, it is assumed that more playtime within a season could lead to a higher score.
 
@@ -242,11 +250,11 @@ The coefficient for 'mp' is positive (310.86), highlighting a direct relationshi
 
 To refine the model, feature engineering introduced the 'pts_per_min' predictor, combining points with minutes played to assess scoring efficiency. This reflects how well players score relative to their time on the court. 'tov_per_game' adjusts turnovers for the number of games, enabling a fairer comparison across players, and 'pf_per_game' computes the average fouls per game, a significant aspect in evaluating defensive conduct and the potential impact on game participation and point contribution. 
 
-To guarantee that the final lasso regression model's predictions stay within realistic limits, we've implemented a simple yet deliberate adjustment: all negative predicted values are set to zero. While this approach may appear overly simplistic, it is employed for considered reasons that will be elaborated upon in the Discussion section (@sec-Discussion).
+To guarantee that the final lasso regression model's predictions stay within realistic limits, we've implemented a simple yet deliberate adjustment: all negative predicted values are set to zero. While this approach may appear overly simplistic, it is employed for considered reasons that will be elaborated upon in the Discussion section (@sec-discussion).
 
 These engineered features aim to provide a clearer understanding of each player's performance, leading to an improved model with lower error metrics.
 
-# Results
+# Results {#sec-results}
 
 ## Model overview
 
@@ -341,7 +349,7 @@ Table @tbl-model2 presents the comparison of actual points scored by players aga
 
 When we compare this to the predictions in @tbl-model1, we notice a substantial improvement. Previously, for a player ranked 5, the model had overestimated with a prediction of 702 points, and for a player ranked 1, it had predicted 414.39 points, which was quite higher than the actual. In contrast, @tbl-model2 shows a more accurate and precise prediction, indicating that the model has been better tuned.
 
-However, in @tbl-model2, there are instances where predictions have been adjusted to 0, such as at Ranks 11 and 33. This adjustment, while necessary to avoid non-sensical negative predictions, could introduce bias. Further explanation and exploration of this methodological choice will be provided in @sec-Discussion of the paper.
+However, in @tbl-model2, there are instances where predictions have been adjusted to 0, such as at Ranks 11 and 33. This adjustment, while necessary to avoid non-sensical negative predictions, could introduce bias. Further explanation and exploration of this methodological choice will be provided in @sec-discussion of the paper.
 
 ```{r}
 #| echo: false
@@ -485,18 +493,27 @@ ggplot(analysis_data, aes(x = pf, y = pts)) +
 
 The importance of these variables in predicting the number of points scored is underpinned by their direct and indirect contributions to a player's impact on the game. Minutes played directly increases opportunities for scoring, turnovers may indicate a player's involvement in high-risk, high-reward plays, total rebounds reflect on a player's capacity to create scoring opportunities, and personal fouls can be indicative of aggressive play styles that could also lead to scoring. These findings support the decision to include these variables in the predictive model because they play a significant role in predicting the number of points scored.
 
-# Discussion {#sec-Discussion}
+# Discussion {#sec-discussion}
 
-## First discussion point
+The ability to predict player performance metrics in sports is a critical aspect of team management and strategy development. In this paper, we've created a model that accurately forecasts NBA players' total points using a variety of performance metrics.
 
+## Model summary and modifications
 
-## Second discussion point
+In this paper, we have applied a lasso regression model, a recognized method in statistics, to estimate the total points scored by NBA players from their performance statistics. This approach was selected for its ability to handle numerous predictors and its efficiency in shrinking less relevant predictors' coefficients towards zero, thus simplifying the model.
 
-## Third discussion point
+We refined the model through feature engineering, a crucial step in which we derived new variables such as points per minute played, turnovers per game, and personal fouls per game. These variables were specifically constructed to capture the efficiency and impact of a player’s performance relative to their time on the court and their involvement in the game. Moreover, we addressed the issue of negative predictions—impossible in the real-world context of point scoring—by setting a floor value of zero. While these modifications led to improvements in predictive accuracy, they also introduced certain limitations that we'll discuss subsequently.
 
-## Weaknesses and next steps
+## Key Predictive Variables
 
-Weaknesses and next steps should also be included.
+Our findings reveal that minutes played, turnovers, total rebounds, and personal fouls hold substantial predictive power for determining a player's total points. These variables contribute significantly to a player’s performance score, with minutes played emerging as a particularly potent predictor. This aligns with the intuitive understanding that more time on the court allows for more opportunities to score.
+
+## Weaknesses
+
+The study's methodology presents several weaknesses. Firstly, the potential non-linear relationships between some predictors and the total points scored are not fully captured by the lasso regression model. This could lead to an oversimplification of the complex dynamics of basketball performance. Secondly, the method of setting negative predictions to zero, though it ensures realistic prediction values, might reduce the model's accuracy as it deviates from true statistical adjustments, such as those achievable through log transformation. Thirdly, limiting the analysis to data points below a threshold of 1000 points may obscure the model's performance at the higher end of the spectrum. Lastly, the removal of the 'tm' (team) variable could ignore the potential change of players' performance across different teams, potentially affecting model's prediction.
+
+## Next steps
+
+To build upon this study's foundation, future research should consider incorporating data from multiple seasons to provide a more robust training set for the model, potentially capturing more subtle patterns in player performance over time. Including the 'tm' variable in the analysis might offer insights into how team dynamics influence individual performance. Further exploration into non-linear modeling techniques could also better accommodate the complex relationships within the data.
 
 \newpage
 
