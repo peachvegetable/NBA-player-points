@@ -42,7 +42,7 @@ The remainder of this paper is structured as follows. @sec-data....
 
 The dataset for this analysis was acquired from Basketball Reference @citeDataset and includes a wide range of NBA player statistics for the 2023-2024 season. The process of downloading this dataset involved converting the website's data table into a CSV format, then transferring this data into Excel. In Excel, I employed the 'Text to Columns' feature to separate the statistics using commas, thereby preparing the dataset for analysis. This dataset comprises a variety of player statistics, such as position, age, assists, and steals, with a total of 718 observations before any data cleaning.
 
-The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' @citeTidyverse and 'Janitor' @citeJanitor packages, while 'Dplyr' @citeDplyr and 'Broom' @citeBroom were used for data manipulation and data frame visualization. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling and model visualization were facilitated by the 'Tidymodels' @citeTidymodels and 'Modelsummary' @citeModelsummary packages, respectively.
+The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' @citeTidyverse and 'Janitor' @citeJanitor packages, while 'Dplyr' @citeDplyr and 'Broom' @citeBroom were used for data manipulation and data frame visualization. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling was done by the 'Tidymodels' @citeTidymodels.
 
 The raw data is presented in @sec-raw-data, divided into four separate tables (@tbl-tbl1, @tbl-tbl2, @tbl-tbl3, @tbl-tbl4). The dataset contains 30 variables, each thoroughly introduced and explained in @sec-raw-data, offering a detailed view of the data that forms the basis of this study.
 
@@ -81,7 +81,7 @@ In @tbl-top5players, we see variables that are directly linked to a player's tot
 
 The dataset initially detailed players across 12 unique positions, which was quite detailed for modeling purposes. To simplify, I grouped these positions into three main categories: Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, and Centers (C): C, PF-C, C-PF. This grouping was intended to make the model clearer and to potentially improve its predictive power by reducing unnecessary complexity and avoiding overlap in variables.
 
-Additionally, I re-evaluated the necessity of certain variables such as 'trb' (total rebounds), 'player', and 'tm' (team). 'trb', being the sum of 'orb' (offensive rebounds) and 'drb' (defensive rebounds), didn't provide additional insight and was thus omitted. The 'player' variable was removed in favor of 'rk' (rank), which sufficed for identifying players without duplicating information. Lastly, the 'tm' variable was excluded as the analysis didn't focus on team-specific performance, making the team data unnecessary for this study.
+Additionally, I re-evaluated the necessity of certain variables such as 'trb' (total rebounds), 'player', and 'tm' (team). 'trb', being the sum of 'orb' (offensive rebounds) and 'drb' (defensive rebounds), didn't provide additional insight and was thus omitted. The 'player' variable was removed in favor of 'rk' (rank), which sufficed for identifying players without duplicating information. Additionally, there are duplicated ranks ('rk') since some players may be transferred to a different team during the season, so the identifier is not unique. Lastly, the 'tm' variable was excluded as the analysis didn't focus on team-specific performance, making the team data unnecessary for this study.
 
 ```{r}
 #| echo: false
@@ -111,9 +111,9 @@ analysis_data |>
 As illustrated in @tbl-top10players, aside from 'rk' serving as an identifier, the selected variables are central to our analysis. These will act as predictors for estimating a player's total points, considering factors such as 3-point goal percentage, position, among others. Furthermore, for enhanced clarity, the values in the tables have been formatted to display two decimal places.
 
 
-# Model
+# Model {#sec-Model}
 
-This model pursues two main aims. The initial goal is to predict the total points an NBA player might score based on various performance indicators such as position and shooting efficiency. The second goal is to identify which predictors most significantly affect a player's scoring ability. For example, it is assumed that more playtime within a season could lead to a higher score.
+This model pursues two main goals. The initial goal is to predict the total points an NBA player might score based on various performance indicators such as position and shooting efficiency. The second goal is to identify which predictors most significantly affect a player's scoring ability. For example, it is assumed that more playtime within a season could lead to a higher score.
 
 To meet these objectives, the lasso regression model is chosen for its unique features: First, with 19 predictors left after processing the data, the lasso regression can reduce the influence of less important predictors by setting their coefficients to zero. Second, it clearly indicates which predictors have a greater impact on the scoring outcome, helping to understand what factors are most important in determining a player's points.
 
@@ -147,7 +147,7 @@ first_lasso_model <- readRDS("../models/first_lasso_model.rds")
 analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
 # data splitting
-set.seed(321) # For reproducibility
+set.seed(123) # For reproducibility
 data_split <- initial_split(analysis_data, prop = 0.8)
 test_data <- testing(data_split)
 
@@ -201,7 +201,7 @@ rownames(results) <- "First lasso regression model"
 kable(results, booktabs = TRUE, digits = 2)
 ```
 
-The table @tbl-model1rmsemae lists two error metrics for assessing the first lasso regression model. RMSE(Root Mean Squared Error), recorded at 111.79, captures the average error by squaring the difference between the model's predictions and the actual points, thereby giving more weight to larger discrepancies and making it particularly useful where such errors have greater consequences. MAE(Mean Absolute Error), noted as 80.6, represents the simple average of all prediction errors without emphasis on their size, making it a reliable metric when treating all errors uniformly is preferable. Utilizing both RMSE and MAE provides a dual perspective: RMSE highlights the impact of substantial errors, and MAE offers a clear measure of average error, assisting in a balanced evaluation of the model's performance. This approach to error analysis suggests that the model's predictions could be improved by reevaluating the included features, especially in areas where the model's accuracy is critical.
+@tbl-model1rmsemae lists two error metrics for assessing the first lasso regression model. RMSE(Root Mean Squared Error), recorded at 111.79, captures the average error by squaring the difference between the model's predictions and the actual points, thereby giving more weight to larger discrepancies and making it particularly useful where such errors have greater consequences. MAE(Mean Absolute Error), noted as 80.6, represents the simple average of all prediction errors without emphasis on their size, making it a reliable metric when treating all errors uniformly is preferable. Utilizing both RMSE and MAE provides a dual perspective: RMSE highlights the impact of substantial errors, and MAE offers a clear measure of average error, assisting in a balanced evaluation of the model's performance. This approach to error analysis suggests that the model's predictions could be improved by reevaluating the included features, especially in areas where the model's accuracy is critical.
 
 ### Feature engineering
 
@@ -240,7 +240,15 @@ important_predictors |>
 
 The coefficient for 'mp' is positive (310.86), highlighting a direct relationship with point totals — more minutes played usually provides more opportunities for scoring. In contrast, 'orb' has a negative coefficient (-70.80), hinting at players with high offensive rebounds not necessarily correlating with higher points, perhaps indicating a focus on rebounding over scoring. 'Tov' carries a positive coefficient (225.98), which might seem counterintuitive given turnovers are adverse events; yet, it could reflect that players who handle the ball frequently might incur more turnovers and also have more scoring chances. A positive coefficient for 'drb' (73.62) suggests a link between securing defensive rebounds and higher point scores, likely due to the additional possessions gained. 'Pf' shows a negative coefficient (-65.66), indicating that fouling frequently could decrease a player's scoring by reducing playing time due to foul trouble.
 
-To refine the model, feature engineering introduced the 'pts_per_min' predictor, combining points with minutes played to assess scoring efficiency. This reflects how well players score relative to their time on the court. 'tov_per_game' adjusts turnovers for the number of games, enabling a fairer comparison across players, and 'pf_per_game' computes the average fouls per game, a significant aspect in evaluating defensive conduct and the potential impact on game participation and point contribution. These engineered features aim to provide a clearer understanding of each player's performance, leading to an improved model with lower error metrics.
+To refine the model, feature engineering introduced the 'pts_per_min' predictor, combining points with minutes played to assess scoring efficiency. This reflects how well players score relative to their time on the court. 'tov_per_game' adjusts turnovers for the number of games, enabling a fairer comparison across players, and 'pf_per_game' computes the average fouls per game, a significant aspect in evaluating defensive conduct and the potential impact on game participation and point contribution. 
+
+To guarantee that the final lasso regression model's predictions stay within realistic limits, we've implemented a simple yet deliberate adjustment: all negative predicted values are set to zero. While this approach may appear overly simplistic, it is employed for considered reasons that will be elaborated upon in the Discussion section (@sec-Discussion).
+
+These engineered features aim to provide a clearer understanding of each player's performance, leading to an improved model with lower error metrics.
+
+# Results
+
+## Model overview
 
 ```{r}
 #| echo: false
@@ -267,7 +275,10 @@ data_split <- initial_split(analysis_data, prop = 0.8)
 test_data <- testing(data_split)
 
 # predictions for the first model
-predictions <- predict(second_lasso_model, test_data)
+predictions <- predict(second_lasso_model, test_data) 
+
+predictions[predictions < 0] <- 0
+
 results <- bind_cols(test_data, predictions)
 # Calculate RMSE for the first model
 rmse_results <- rmse(results, truth = pts, estimate = .pred)
@@ -283,47 +294,201 @@ rownames(results) <- "Second lasso regression model"
 kable(results, booktabs = TRUE, digits = 2)
 ```
 
-As shown in @tbl-model2rmsemae, the second lasso regression model, enhanced with engineered features, has demonstrated significant improvement. The RMSE has decreased from 111.7 to 94.68, and the MAE has dropped from 80.6 to 66.14. This reduction in both metrics indicates that the model now predicts the number of points an NBA player could score based on their performances with greater precision.
+As shown in @tbl-model2rmsemae, the second lasso regression model, enhanced with engineered features, has demonstrated significant improvement. The RMSE has decreased from 110.17 to 91.6, and the MAE has dropped from 78.2 to 61.31. This reduction in both metrics indicates that the model now predicts the number of points an NBA player could score based on their performances with greater precision. 
 
-# Results
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-model2
+#| tbl-cap: Final lasso regression model top 10 predictions
 
-Results Section Framework:
-Overview of Model Performance:
+second_lasso_model <- readRDS("../models/second_lasso_model.rds")
 
-Start by summarizing the overall performance of the final lasso regression model. Mention the improvement in the error metrics (RMSE and MAE) after the feature engineering, highlighting how these changes have enhanced the model's predictive accuracy.
-Example: "The refinement of the lasso regression model through targeted feature engineering significantly enhanced its predictive accuracy. The RMSE decreased from 111.7 to 94.68, and the MAE improved from 80.6 to 66.14, indicating a more precise model in predicting NBA players' points based on performance metrics."
-Detailed Results from Predictive Analysis:
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
-Present specific results, such as how well the model predicted points for different players or player types. If applicable, include comparisons to show the model's performance before and after feature engineering.
-Example: "Detailed analysis reveals that the model, after enhancements, provides a more accurate prediction across a range of player performance indicators, such as minutes played and turnovers. The incorporation of efficiency metrics like points per minute played ('pts_per_min') significantly contributed to this improvement."
-Statistical Significance and Confidence:
+analysis_data <- analysis_data |>
+  mutate(
+    pts_per_min = pts / mp,
+    tov_per_game = tov /g,
+    pf_per_game = pf / g
+  )
 
-Discuss any statistical tests or confidence intervals used to ascertain the reliability of the model's predictions. This could involve discussing p-values for coefficients or the confidence in the model's error metrics.
-Example: "Statistical tests affirm the significance of newly integrated predictors, with p-values well below the conventional threshold of 0.05, thereby reinforcing confidence in the model's enhancements."
-Visualization of Results:
+# data splitting
+set.seed(123) # For reproducibility
+data_split <- initial_split(analysis_data, prop = 0.8)
+test_data <- testing(data_split)
 
-If visual aids (such as plots or charts) were used to illustrate the model's performance or to compare the predicted vs. actual points, briefly describe these visualizations and their outcomes.
-Example: "Graphical representations, included in fig-predictions, show a tight correlation between the model's predictions and the actual points scored, especially after the feature engineering phase."
-Summary of Key Findings:
+# predictions for the first model
+predictions <- predict(second_lasso_model, test_data)
 
-Conclude with a summary of the most critical findings from the model's application, emphasizing how these insights support the model's utility in a real-world context.
-Example: "The results confirm that the enhanced lasso regression model not only predicts the point outcomes with greater accuracy but also highlights the importance of game participation metrics such as minutes played and turnovers in determining a player's scoring potential."
-Additional Tips:
-Clarity and Precision: Keep the language clear and precise, focusing on what the reader needs to understand about the model's performance and the significance of the results.
-Referencing Tables/Graphs: Ensure to reference any tables or graphs from your analysis that support your results. This helps in validating your claims and provides a visual or tabular anchor for your findings.
-Contextualization: Briefly relate your findings to the broader context of sports analytics, perhaps suggesting how these insights could influence team strategy or player evaluation.
-This structure and approach should align with the academic standards outlined in the rubric, ensuring that your Results section is not only informative but also well-integrated with the rest of your paper.
+predictions[predictions < 0] <- 0
+  
+results <- bind_cols(test_data, predictions)
 
+results |>
+  select(rk, pts, .pred) |>
+  head(10) |>
+  rename(
+    "Rank" = rk,
+    "Points" = pts,
+    "Prediction" = .pred
+    ) |>
+  kable(booktabs = TRUE, digits = 2)
+```
 
+Table @tbl-model2 presents the comparison of actual points scored by players against the points predicted by our refined lasso regression model. For each player, designated by a unique rank, the table lists both the actual and predicted points, showcasing the model's predictions. For example, a player at Rank 1 is shown with an actual score of 552 and a closely aligned prediction of 563.81. Similarly, for a player at Rank 41 with an actual score of 114, the model predicts a nearly precise 111.78 points, and another at Rank 1 has an actual score of 359 with a prediction of 347.44, reflecting the model's accuracy.
 
+When we compare this to the predictions in @tbl-model1, we notice a substantial improvement. Previously, for a player ranked 5, the model had overestimated with a prediction of 702 points, and for a player ranked 1, it had predicted 414.39 points, which was quite higher than the actual. In contrast, @tbl-model2 shows a more accurate and precise prediction, indicating that the model has been better tuned.
 
+However, in @tbl-model2, there are instances where predictions have been adjusted to 0, such as at Ranks 11 and 33. This adjustment, while necessary to avoid non-sensical negative predictions, could introduce bias. Further explanation and exploration of this methodological choice will be provided in @sec-Discussion of the paper.
 
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-model1model2
+#| fig-cap: Comparison of first model prediction and second model prediction
 
-# Discussion
+# first model
+first_lasso_model <- readRDS("../models/first_lasso_model.rds")
 
-## First discussion point {#sec-first-point}
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+# data splitting
+set.seed(123) # For reproducibility
+data_split <- initial_split(analysis_data, prop = 0.8)
+test_data <- testing(data_split)
+
+# predictions for the first model
+predictions <- predict(first_lasso_model, test_data)
+results <- bind_cols(test_data, predictions)
+first_predictions <- results |>
+  select(rk, pts, .pred) |>
+  rename(First_Prediction = .pred)
+
+# second model
+second_lasso_model <- readRDS("../models/second_lasso_model.rds")
+
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+analysis_data <- analysis_data |>
+  mutate(
+    pts_per_min = pts / mp,
+    tov_per_game = tov /g,
+    pf_per_game = pf / g
+  )
+
+# data splitting
+set.seed(123) # For reproducibility
+data_split <- initial_split(analysis_data, prop = 0.8)
+test_data <- testing(data_split)
+
+# predictions for the first model
+predictions <- predict(second_lasso_model, test_data)
+
+predictions[predictions < 0] <- 0
+  
+results <- bind_cols(test_data, predictions)
+
+second_predictions <- results |>
+  select(rk, pts, .pred) |>
+  rename(Second_Prediction = .pred)
+
+# Combine the first and second predictions with the actual points
+combined_predictions <- test_data |>
+  select(rk, pts) |>
+  mutate(
+    First_Prediction = first_predictions$First_Prediction,
+    Second_Prediction = second_predictions$Second_Prediction
+  )
+
+# Combine the first and second predictions with the actual points
+ggplot(combined_predictions, aes(x = pts)) +
+  geom_point(aes(y = First_Prediction, color = "First Model"), alpha = 0.5) +
+  geom_point(aes(y = Second_Prediction, color = "Second Model"), alpha = 0.5) +
+  labs(
+    x = "Actual Points",
+    y = "Predicted Points",
+    color = "Model"
+  ) +
+  theme_minimal() +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+  coord_cartesian(xlim = c(0, 1000), ylim = c(0, 1000)) + # Setting axis limits
+  scale_color_manual(values = c("First Model" = "blue", "Second Model" = "green")) +
+  theme(legend.position = "bottom")
+```
+@fig-model1model2 is a scatter plot, which illustrates a comparison between actual points scored by players and predictions made by two different lasso regression models, with the data scope specifically capped at 1000 points to allow for a detailed examination of the data. The x-axis denotes the actual points, while the y-axis corresponds to the predicted points from each model. The green dots, representing predictions from the second model, are observed to cluster more closely to the red dashed line, which signifies perfect accuracy where predicted points match actual points. This clustering indicates that the second model generally has better predictive accuracy compared to the first model, whose predictions are denoted by the other color, perhaps blue, and may not cluster as tightly around this line of accuracy.
+
+By limiting the axis range to 1000 points, the plot intentionally omits the few data points that lie beyond this threshold, ensuring a zoomed-in view that emphasizes the predictive performance for the majority of players. This focused range makes it easier to effectively compare the predictive accuracy of the two models.
+
+## Important predictors
+
+According to @tbl-model1variables, predictors 'mp', 'tov', 'drb', 'orb', and 'pf' are the most important variables that contribute to the prediction of number of points as indicated by their coefficients in the model. To explore how these variables correlate with the scoring outcome, scatter plots were made to display their relationships with the target variable number of points.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-variables
+#| fig-cap: Impact of Player Performance Metrics on Scoring Across Key Statistical Relationships
+#| fig-subcap: ["minutes played vs points", "turnovers vs points", "total rebounds vs points", "personal fouls vs points"]
+#| layout-ncol: 2
+
+# Load the data
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+analysis_data$trb = analysis_data$orb + analysis_data$drb
+
+# Plotting the relationship between minutes played (mp) and points (pts)
+ggplot(analysis_data, aes(x = mp, y = pts)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    x = "Minutes Played (mp)",
+    y = "Points Scored (pts)"
+  ) +
+  theme_minimal()
+
+# Plotting the relationship between turnovers (tov) and points (pts)
+ggplot(analysis_data, aes(x = tov, y = pts)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    x = "Turnovers (tov)",
+    y = "Points Scored (pts)"
+  ) +
+  theme_minimal()
+
+# Plotting the relationship between total rebounds (trb) and points (pts)
+ggplot(analysis_data, aes(x = trb, y = pts)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    x = "Total Rebounds (trb)",
+    y = "Points Scored (pts)"
+  ) +
+  theme_minimal()
+
+# Plotting the relationship between personal fouls (pf) and points (pts)
+ggplot(analysis_data, aes(x = pf, y = pts)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    x = "Personal Fouls (pf)",
+    y = "Points Scored (pts)"
+  ) +
+  theme_minimal()
+```
+
+@fig-variables illustrates the relationships between various performance metrics and the total points scored by players, with each plot featuring a distinct statistical category. The linear trend lines, marked in red, offer a visual summary of each relationship. @fig-variables-1 shows a positive correlation between the minutes played ('mp') and the points scored ('pts'). The upward trend suggests that players who spend more time on the court tend to score more points. This is intuitive as more playing time offers more opportunities to score. @fig-variables-2 displays the relationship between turnovers ('tov') and points scored also appears to be positive. Typically, turnovers are considered negative events; however, this positive trend may imply that players who are more involved in action-packed facets of the game tend to score higher, even though they might also commit more turnovers. Total rebounds ('trb'), which is a composite measure of offensive ('orb') and defensive rebounds ('drb'), @fig-variables-3 displays a positive relationship with points scored. This indicates players who are effective in rebounding contribute significantly to the game by retaining possession and potentially scoring more points. Lastly, @fig-variables-4 suggests a less steep yet positive correlation. While personal fouls are typically unwanted, they can be an indicator of aggressive play, which, depending on a player's role, may correlate with higher scoring if those players are also pivotal in offensive plays.
+
+The importance of these variables in predicting the number of points scored is underpinned by their direct and indirect contributions to a player's impact on the game. Minutes played directly increases opportunities for scoring, turnovers may indicate a player's involvement in high-risk, high-reward plays, total rebounds reflect on a player's capacity to create scoring opportunities, and personal fouls can be indicative of aggressive play styles that could also lead to scoring. These findings support the decision to include these variables in the predictive model because they play a significant role in predicting the number of points scored.
+
+# Discussion {#sec-Discussion}
+
+## First discussion point
+
 
 ## Second discussion point
 

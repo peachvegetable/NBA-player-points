@@ -17,7 +17,7 @@ analysis_data <- read_parquet("data/analysis_data/analysis_data.parquet")
 
 ### Model data ####
 
-set.seed(321) # For reproducibility
+set.seed(123) # For reproducibility
 data_split <- initial_split(analysis_data, prop = 0.8)
 train_data <- training(data_split)
 test_data <- testing(data_split)
