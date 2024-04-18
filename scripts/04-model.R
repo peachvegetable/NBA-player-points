@@ -24,7 +24,6 @@ test_data <- testing(data_split)
 
 # preprocesssing with recipe
 data_recipe <- recipe(pts ~ ., data = train_data) |>
-  step_rm(rk) |>
   step_normalize(all_numeric_predictors()) |>
   step_dummy(broad_position)
 
@@ -80,7 +79,6 @@ test_data <- testing(data_split)
 
 # preprocesssing with recipe
 data_recipe <- recipe(pts ~ ., data = train_data) |>
-  step_rm(rk) |>
   step_normalize(all_numeric_predictors()) |>
   step_dummy(broad_position)
 

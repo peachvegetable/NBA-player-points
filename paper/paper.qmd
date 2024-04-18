@@ -18,7 +18,7 @@ bibliography: references.bib
 #| warning: false
 #| message: false
 
-### work space setup ###
+### woid space setup ###
 library(tidyverse)
 library(arrow)
 library(tidymodels)
@@ -47,17 +47,16 @@ The paper is structured as follows: @sec-data covers the data collection and pre
 
 # Data {#sec-data}
 
-
 The dataset for this analysis was acquired from Basketball Reference @citeDataset and includes a wide range of NBA player statistics for the 2023-2024 season. The process of downloading this dataset involved converting the website's data table into a CSV format, then transferring this data into Excel. In Excel, I employed the 'Text to Columns' feature to separate the statistics using commas, thereby preparing the dataset for analysis. This dataset comprises a variety of player statistics, such as position, age, assists, and steals, with a total of 718 observations before any data cleaning.
 
-The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' @citeTidyverse and 'Janitor' @citeJanitor packages, while 'Dplyr' @citeDplyr and 'Broom' @citeBroom were used for data manipulation and data frame visualization. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling was done by the 'Tidymodels' @citeTidymodels.
+The analysis was conducted in the R statistical programming environment @citeR, utilizing a selection of packages for different tasks. Data cleaning was performed using the 'Tidyverse' by @citeTidyverse and 'Janitor' by @citeJanitor packages, while 'Dplyr' @citeDplyr and 'Broom' @citeBroom were used for data manipulation and data frame visualization. The 'Knitr' @citeKnitr and 'Ggplot2' @citeGgplot2 packages were employed for data visualization, including the creation of tables and figures. Predictive modeling was done by the 'Tidymodels' @citeTidymodels.
 
 The raw data is presented in @sec-raw-data, divided into four separate tables (@tbl-tbl1, @tbl-tbl2, @tbl-tbl3, @tbl-tbl4). The dataset contains 30 variables, each thoroughly introduced and explained in @sec-raw-data, offering a detailed view of the data that forms the basis of this study.
 
 
 ## Data processing and interested predictors
 
-This dataset comprises statistics for players, such as 3-point goals, 2-point goals, field goals, and free throws, from which points can be derived. My objective is to forecast an NBA player's total points based on their performance metrics, indicating a direct correlation between these features and the target variable, namely, points.
+This dataset comprises statistics for players, such as 3-point goals, 2-point goals, field goals, and free throws, which can be used to derive the number of points scored directly. Since my objective is to forecast an NBA player's total points based on their performance metrics, variables that are too closely related to the target variable, namely points should be removed.
 
 ```{r}
 #| echo: false
@@ -89,7 +88,7 @@ In @tbl-top5players, we see variables that are directly linked to a player's tot
 
 The dataset initially detailed players across 12 unique positions, which was quite detailed for modeling purposes. To simplify, I grouped these positions into three main categories: Guards (G): SG, PG, SG-PG, PG-SG, Forwards (F): SF, PF, PF-SF, and Centers (C): C, PF-C, C-PF. This grouping was intended to make the model clearer and to potentially improve its predictive power by reducing unnecessary complexity and avoiding overlap in variables.
 
-Additionally, I re-evaluated the necessity of certain variables such as 'trb' (total rebounds), 'player', and 'tm' (team). 'trb', being the sum of 'orb' (offensive rebounds) and 'drb' (defensive rebounds), didn't provide additional insight and was thus omitted. The 'player' variable was removed in favor of 'rk' (rank), which sufficed for identifying players without duplicating information. Additionally, there are duplicated ranks ('rk') since some players may be transferred to a different team during the season, so the identifier is not unique. Lastly, the 'tm' variable was excluded as the analysis didn't focus on team-specific performance, making the team data unnecessary for this study.
+Additionally, I re-evaluated the necessity of certain variables such as 'trb' (total rebounds), 'player', 'rk' (rank), and 'tm' (team). 'trb', being the sum of 'orb' (offensive rebounds) and 'drb' (defensive rebounds), didn't provide additional insight and was thus omitted. I also replaced 'player' and 'id' with a new variable 'id', which is sufficient for uniquely identifying players without redundancy. The 'rk' variable often duplicated because players sometimes transfer between teams within a season, making 'rk' and 'player' unreliable identifiers. Instead, I introduced 'id', assigned by row number, to effectively differentiate players across different teams, ensuring each instance is treated distinctly. Therefore, the same person in a different team would have a different id. Lastly, the 'tm' variable was excluded as the analysis didn't focus on team-specific performance, making the team data unnecessary for this study.
 
 ```{r}
 #| echo: false
@@ -113,10 +112,10 @@ analysis_data |>
     'ft%' = ft_percent,
     'pos' = broad_position
   ) |>
-  kable(digits = 2)
+  kable(digits = 0)
 ```
 
-As illustrated in @tbl-top10players, aside from 'rk' serving as an identifier, the selected variables are central to our analysis. These will act as predictors for estimating a player's total points, considering factors such as 3-point goal percentage, position, among others. Furthermore, for enhanced clarity, the values in the tables have been formatted to display two decimal places.
+As illustrated in @tbl-top10players, aside from 'id' serving as an identifier, the selected variables are central to our analysis. These will act as predictors for estimating a player's total points, considering factors such as 3-point goal percentage, position, among others. Furthermore, for enhanced clarity, the values in the tables have been formatted to display only integers, since it is unlikely to have 0.3 point in scoring in basketball.
 
 
 # Model {#sec-model}
@@ -133,13 +132,13 @@ Lasso regression, a variant of linear regression models, is notable for its abil
 y_i = \beta_0 + \beta_i \cdot X_i
 \end{align}
 
-In this equation, $y_i$ is the number of points a player scores, which is the dependent variable I am trying to predict. $\beta_0$ is the interception, and $\beta_i$ is a matrix that contains the coefficients $\beta_1, \beta_2, ..., \beta_{18}$ for each predictor that the lasso regression will estimate. $X_i$ is also a matrix contains the predictors: players position, age, games, game starts, minutes played, field goal percentage, 3-point field goal percentage, 2-point field goal percentage, effective field goal percentage, free throw percentage, offensive rebounds, defensive rebounds, total rebounds, assists, steals, blocks, turnovers, and personal fouls. 
+In this equation, $y_i$ is the number of points a player scores, which is the dependent variable I am trying to predict. $\beta_0$ is the interception, which represents the average value of y when x is 0, and $\beta_i$ is a matrix that contains the coefficients $\beta_1, \beta_2, ..., \beta_{18}$ for each predictor that the lasso regression will estimate. $X_i$ is also a matrix contains the predictors: players position, age, games, game starts, minutes played, field goal percentage, 3-point field goal percentage, 2-point field goal percentage, effective field goal percentage, free throw percentage, offensive rebounds, defensive rebounds, assists, steals, blocks, turnovers, and personal fouls. ID is not included here since it's just an identifier.
 
 We run the model in R [@citeR] using the `tidymodels` package of @citeTidymodels.
 
 ## Model justification
 
-We anticipate a positive correlation between the points scored and several factors: age, minutes played, number of games played, games started, shooting efficiency (encompassed by 2-point goal percentage, 3-point goal percentage, field goal percentage, and free throw percentage), rebounds (both offensive and defensive), and assists. The logic is straightforward: the higher these variables, the greater the likelihood of scoring more points. Additionally, a player's position could influence their scoring, as different positions in basketball have distinct objectives; for instance, center(C) may prioritize defense over scoring.
+We anticipate a positive correlation between the points scored and several factors: minutes played, number of games played, games started, shooting efficiency (encompassed by 2-point goal percentage, 3-point goal percentage, field goal percentage, and free throw percentage), rebounds (both offensive and defensive), and assists. The logic is straightforward: the higher these variables, the greater the likelihood of scoring more points. Additionally, a player's position could influence their scoring, as different positions in basketball have distinct objectives; for instance, center(C) may prioritize defense over scoring. A negative correlation may appear between age and the number of points scored, since it would be natural to assume that an older player could be weaker than a younger player due to aging, and thus scores less.
 
 ## Model performance
 
@@ -164,16 +163,16 @@ predictions <- predict(first_lasso_model, test_data)
 results <- bind_cols(test_data, predictions)
 
 results |>
-  select(rk, pts, .pred) |>
+  select(id, pts, .pred) |>
   head(10) |>
   rename(
-    "Rank" = rk,
+    "ID" = id,
     "Points" = pts,
     "Prediction" = .pred
     ) |>
-  kable(booktabs = TRUE, digits = 2)
+  kable(booktabs = TRUE, digits = 0)
 ```
-@tbl-model1 displays the predictions made by the initial lasso regression model for the number of points scored by NBA players, numbered by 'Rank' identifier. For each 'Rank', there are two columns: 'Points', which represents the actual points scored, and 'Prediction', which shows the predicted points scored by the model. It's noticeable that there's a variance between the actual points and the predicted values. The model does not seem to accurately predict the points: In some cases, such as Rank 3, the model overestimates the points, predicting 372.78 points against the actual 274. In other instances, like Rank 7, the prediction is quite close to the actual points scored (1128.62 predicted vs. 1142 actual). There are also underestimations, as seen with Rank 30, where the model predicts 985.43 points while the actual points scored are 1036. 
+@tbl-model1 displays the predictions made by the initial lasso regression model for the number of points scored by NBA players, numbered by 'ID' identifier. For each 'ID', there are two columns: 'Points', which represents the actual points scored, and 'Prediction', which shows the predicted points scored by the model. It's noticeable that there's a variance between the actual points and the predicted values. The model does not seem to accurately predict the points: In some cases, such as ID 9, the model overestimates the points, predicting 701 points against the actual 563. In other instances, like ID 2, the prediction is quite close to the actual points scored (184 predicted vs. 193 actual). There are also unrealistic estimations, as seen with ID 15, where the model predicts -1 points while the actual points scored are 26, which it is impossible to have negative points scored in basketball. 
 
 ```{r}
 #| echo: false
@@ -209,7 +208,7 @@ rownames(results) <- "First lasso regression model"
 kable(results, booktabs = TRUE, digits = 2)
 ```
 
-@tbl-model1rmsemae lists two error metrics for assessing the first lasso regression model. RMSE(Root Mean Squared Error), recorded at 111.79, captures the average error by squaring the difference between the model's predictions and the actual points, thereby giving more weight to larger discrepancies and making it particularly useful where such errors have greater consequences. MAE(Mean Absolute Error), noted as 80.6, represents the simple average of all prediction errors without emphasis on their size, making it a reliable metric when treating all errors uniformly is preferable. Utilizing both RMSE and MAE provides a dual perspective: RMSE highlights the impact of substantial errors, and MAE offers a clear measure of average error, assisting in a balanced evaluation of the model's performance. This approach to error analysis suggests that the model's predictions could be improved by reevaluating the included features, especially in areas where the model's accuracy is critical.
+@tbl-model1rmsemae lists two error metrics for assessing the first lasso regression model. RMSE(Root Mean Squared Error), recorded at 110.12, captures the average error by squaring the difference between the model's predictions and the actual points, thereby giving more weight to larger discrepancies and making it particularly useful where such errors have greater consequences. MAE(Mean Absolute Error), noted as 78.23, represents the simple average of all prediction errors without emphasis on their size, making it a reliable metric when treating all errors uniformly is preferable. Utilizing both RMSE and MAE provides a dual perspective: RMSE highlights the impact of substantial errors, and MAE offers a clear measure of average error, assisting in a balanced evaluation of the model's performance. This approach to error analysis suggests that the model's predictions could be improved by re-evaluating the included features, especially in areas where the model's accuracy is critical.
 
 ### Feature engineering
 
@@ -241,12 +240,12 @@ important_predictors |>
     "Predictors" = term,
     "Coefficients" = estimate
   ) |>
-  kable(booktabs = TRUE, digits = 2)
+  kable(booktabs = TRUE, digits = 0)
 ```
 
 @tbl-model1variables lists the predictors with the highest magnitude coefficients from the lasso regression model, indicating their relative importance in predicting the outcome variable. The listed predictors are minutes played ('mp'), turnovers ('tov'), defensive rebounds ('drb'), offensive rebounds ('orb'), and personal fouls ('pf'), with their corresponding coefficients. 
 
-The coefficient for 'mp' is positive (310.86), highlighting a direct relationship with point totals — more minutes played usually provides more opportunities for scoring. In contrast, 'orb' has a negative coefficient (-70.80), hinting at players with high offensive rebounds not necessarily correlating with higher points, perhaps indicating a focus on rebounding over scoring. 'Tov' carries a positive coefficient (225.98), which might seem counterintuitive given turnovers are adverse events; yet, it could reflect that players who handle the ball frequently might incur more turnovers and also have more scoring chances. A positive coefficient for 'drb' (73.62) suggests a link between securing defensive rebounds and higher point scores, likely due to the additional possessions gained. 'Pf' shows a negative coefficient (-65.66), indicating that fouling frequently could decrease a player's scoring by reducing playing time due to foul trouble.
+The coefficient for 'mp' is positive (305), highlighting a direct relationship with point totals — more minutes played usually provides more opportunities for scoring. In contrast, 'orb' has a negative coefficient (-60), hinting at players with high offensive rebounds not necessarily correlating with higher points, perhaps indicating a focus on rebounding over scoring. 'tov' carries a positive coefficient (209), which might seem counterintuitive given turnovers are adverse events; yet, it could reflect that players who handle the ball frequently might incur more turnovers and also have more scoring chances. A positive coefficient for 'drb' (71) suggests a link between securing defensive rebounds and higher point scores, likely due to the additional possessions gained. 'pf' shows a negative coefficient (-58), indicating that fouling frequently could decrease a player's scoring by reducing playing time due to foul trouble.
 
 To refine the model, feature engineering introduced the 'pts_per_min' predictor, combining points with minutes played to assess scoring efficiency. This reflects how well players score relative to their time on the court. 'tov_per_game' adjusts turnovers for the number of games, enabling a fairer comparison across players, and 'pf_per_game' computes the average fouls per game, a significant aspect in evaluating defensive conduct and the potential impact on game participation and point contribution. 
 
@@ -302,7 +301,7 @@ rownames(results) <- "Second lasso regression model"
 kable(results, booktabs = TRUE, digits = 2)
 ```
 
-As shown in @tbl-model2rmsemae, the second lasso regression model, enhanced with engineered features, has demonstrated significant improvement. The RMSE has decreased from 110.17 to 91.6, and the MAE has dropped from 78.2 to 61.31. This reduction in both metrics indicates that the model now predicts the number of points an NBA player could score based on their performances with greater precision. 
+As shown in @tbl-model2rmsemae, the second lasso regression model, enhanced with engineered features, has demonstrated significant improvement. The RMSE has decreased from 110.12 to 91.03, and the MAE has dropped from 78.23 to 60.8. This reduction in both metrics indicates that the model now predicts the number of points an NBA player could score based on their performances with greater precision. 
 
 ```{r}
 #| echo: false
@@ -335,21 +334,21 @@ predictions[predictions < 0] <- 0
 results <- bind_cols(test_data, predictions)
 
 results |>
-  select(rk, pts, .pred) |>
+  select(id, pts, .pred) |>
   head(10) |>
   rename(
-    "Rank" = rk,
+    "ID" = id,
     "Points" = pts,
     "Prediction" = .pred
     ) |>
-  kable(booktabs = TRUE, digits = 2)
+  kable(booktabs = TRUE, digits = 0)
 ```
 
-Table @tbl-model2 presents the comparison of actual points scored by players against the points predicted by our refined lasso regression model. For each player, designated by a unique rank, the table lists both the actual and predicted points, showcasing the model's predictions. For example, a player at Rank 1 is shown with an actual score of 552 and a closely aligned prediction of 563.81. Similarly, for a player at Rank 41 with an actual score of 114, the model predicts a nearly precise 111.78 points, and another at Rank 1 has an actual score of 359 with a prediction of 347.44, reflecting the model's accuracy.
+@tbl-model2 presents the comparison of actual points scored by players against the points predicted by our refined lasso regression model. For each player, designated by a ID, the table lists both the actual and predicted points, showcasing the model's predictions. For example, a player at ID 1 is shown with an actual score of 552 and a closely aligned prediction of 558. Similarly, for a player at ID 56 with an actual score of 114, the model predicts a nearly precise 107 points, and another at ID 3 has an actual score of 359 with a prediction of 342, reflecting the model's accuracy.
 
-When we compare this to the predictions in @tbl-model1, we notice a substantial improvement. Previously, for a player ranked 5, the model had overestimated with a prediction of 702 points, and for a player ranked 1, it had predicted 414.39 points, which was quite higher than the actual. In contrast, @tbl-model2 shows a more accurate and precise prediction, indicating that the model has been better tuned.
+When we compare this to the predictions in @tbl-model1, we notice a substantial improvement. Previously, for a player ID 9, the model had overestimated with a prediction of 701 points, which was quite higher than the actual, and for a player ID 15 the model had an unrealistic estimation of -1. In contrast, @tbl-model2 shows a more accurate and realistic prediction, indicating that the model has been better tuned.
 
-However, in @tbl-model2, there are instances where predictions have been adjusted to 0, such as at Ranks 11 and 33. This adjustment, while necessary to avoid non-sensical negative predictions, could introduce bias. Further explanation and exploration of this methodological choice will be provided in @sec-discussion of the paper.
+However, in @tbl-model2, there are instances where predictions have been adjusted to 0, such as at ID 15 and 44. This adjustment, while necessary to avoid negative predictions, could introduce bias. Further explanation and exploration of this methodological choice will be provided in @sec-discussion of the paper.
 
 ```{r}
 #| echo: false
@@ -372,7 +371,7 @@ test_data <- testing(data_split)
 predictions <- predict(first_lasso_model, test_data)
 results <- bind_cols(test_data, predictions)
 first_predictions <- results |>
-  select(rk, pts, .pred) |>
+  select(id, pts, .pred) |>
   rename(First_Prediction = .pred)
 
 # second model
@@ -400,12 +399,12 @@ predictions[predictions < 0] <- 0
 results <- bind_cols(test_data, predictions)
 
 second_predictions <- results |>
-  select(rk, pts, .pred) |>
+  select(id, pts, .pred) |>
   rename(Second_Prediction = .pred)
 
 # Combine the first and second predictions with the actual points
 combined_predictions <- test_data |>
-  select(rk, pts) |>
+  select(id, pts) |>
   mutate(
     First_Prediction = first_predictions$First_Prediction,
     Second_Prediction = second_predictions$Second_Prediction
@@ -422,31 +421,26 @@ ggplot(combined_predictions, aes(x = pts)) +
   ) +
   theme_minimal() +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-  coord_cartesian(xlim = c(0, 1000), ylim = c(0, 1000)) + # Setting axis limits
   scale_color_manual(values = c("First Model" = "blue", "Second Model" = "green")) +
   theme(legend.position = "bottom")
 ```
-@fig-model1model2 is a scatter plot, which illustrates a comparison between actual points scored by players and predictions made by two different lasso regression models, with the data scope specifically capped at 1000 points to allow for a detailed examination of the data. The x-axis denotes the actual points, while the y-axis corresponds to the predicted points from each model. The green dots, representing predictions from the second model, are observed to cluster more closely to the red dashed line, which signifies perfect accuracy where predicted points match actual points. This clustering indicates that the second model generally has better predictive accuracy compared to the first model, whose predictions are denoted by the other color, perhaps blue, and may not cluster as tightly around this line of accuracy.
-
-By limiting the axis range to 1000 points, the plot intentionally omits the few data points that lie beyond this threshold, ensuring a zoomed-in view that emphasizes the predictive performance for the majority of players. This focused range makes it easier to effectively compare the predictive accuracy of the two models.
+@fig-model1model2 is a scatter plot, which illustrates a comparison between actual points scored by players and predictions made by two different lasso regression models. The x-axis denotes the actual points, while the y-axis corresponds to the predicted points from each model. The green dots, representing predictions from the second model, are observed to cluster more closely to the red dashed line, which signifies perfect accuracy where predicted points match actual points. This clustering indicates that the second model generally has better predictive accuracy compared to the first model, whose predictions are denoted by the other color, perhaps blue, and may not cluster as tightly around this line of accuracy. However, it can be seen from the figure that the predictions made by the second model are further from the actual values compare with the predictions made by the first model. The possible reason will be discussed in @sec-discussion.
 
 ## Important predictors
 
-According to @tbl-model1variables, predictors 'mp', 'tov', 'drb', 'orb', and 'pf' are the most important variables that contribute to the prediction of number of points as indicated by their coefficients in the model. To explore how these variables correlate with the scoring outcome, scatter plots were made to display their relationships with the target variable number of points.
+According to @tbl-model1variables, predictors 'mp' and 'tov' are the most important variables that contribute to the prediction of number of points as indicated by their coefficients in the model (305 and 209 respectively, much higher than the other three variables). To explore how these variables correlate with the scoring outcome, scatter plots were made to display their relationships with the target variable number of points.
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 #| label: fig-variables
-#| fig-cap: Impact of Player Performance Metrics on Scoring Across Key Statistical Relationships
-#| fig-subcap: ["minutes played vs points", "turnovers vs points", "total rebounds vs points", "personal fouls vs points"]
+#| fig-cap: Impact of player performance metrics on scoring across key statistical relationships
+#| fig-subcap: ["minutes played vs points", "turnovers vs points"]
 #| layout-ncol: 2
 
 # Load the data
 analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
-
-analysis_data$trb = analysis_data$orb + analysis_data$drb
 
 # Plotting the relationship between minutes played (mp) and points (pts)
 ggplot(analysis_data, aes(x = mp, y = pts)) +
@@ -467,31 +461,45 @@ ggplot(analysis_data, aes(x = tov, y = pts)) +
     y = "Points Scored (pts)"
   ) +
   theme_minimal()
+```
 
-# Plotting the relationship between total rebounds (trb) and points (pts)
-ggplot(analysis_data, aes(x = trb, y = pts)) +
+@fig-variables illustrates the relationships between various performance metrics and the total points scored by players, with each plot featuring a distinct statistical category. The linear trend lines, maided in red, offer a visual summary of each relationship. @fig-variables-1 shows a positive correlation between the minutes played ('mp') and the points scored ('pts'). The upward trend suggests that players who spend more time on the court tend to score more points. This is intuitive and proves our assumption as more playing time offers more opportunities to score. @fig-variables-2 displays the relationship between turnovers ('tov') and points scored also appears to be positive. Typically, turnovers are considered negative events; however, this positive trend may imply that players who are more involved in action-packed facets of the game tend to score higher, even though they might also commit more turnovers.
+
+The importance of these variables in predicting the number of points scored is underpinned by their direct and indirect contributions to a player's impact on the game. Minutes played directly increases opportunities for scoring, and turnovers may indicate a player's involvement in high-risk, high-reward plays. These findings support the decision to include these variables in the predictive model because they play a significant role in predicting the number of points scored.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-ageblk
+#| fig-cap: Less important performance metrics on points prediction
+#| fig-subcap: ["age vs points", "blocks vs points"]
+#| layout-ncol: 2
+
+analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
+
+ggplot(analysis_data, aes(x = age, y = pts)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", color = "red", se = FALSE) +
   labs(
-    x = "Total Rebounds (trb)",
+    x = "Age",
     y = "Points Scored (pts)"
   ) +
   theme_minimal()
 
-# Plotting the relationship between personal fouls (pf) and points (pts)
-ggplot(analysis_data, aes(x = pf, y = pts)) +
+ggplot(analysis_data, aes(x = blk, y = pts)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", color = "red", se = FALSE) +
   labs(
-    x = "Personal Fouls (pf)",
+    x = "Blocks (blk)",
     y = "Points Scored (pts)"
   ) +
   theme_minimal()
 ```
 
-@fig-variables illustrates the relationships between various performance metrics and the total points scored by players, with each plot featuring a distinct statistical category. The linear trend lines, marked in red, offer a visual summary of each relationship. @fig-variables-1 shows a positive correlation between the minutes played ('mp') and the points scored ('pts'). The upward trend suggests that players who spend more time on the court tend to score more points. This is intuitive as more playing time offers more opportunities to score. @fig-variables-2 displays the relationship between turnovers ('tov') and points scored also appears to be positive. Typically, turnovers are considered negative events; however, this positive trend may imply that players who are more involved in action-packed facets of the game tend to score higher, even though they might also commit more turnovers. Total rebounds ('trb'), which is a composite measure of offensive ('orb') and defensive rebounds ('drb'), @fig-variables-3 displays a positive relationship with points scored. This indicates players who are effective in rebounding contribute significantly to the game by retaining possession and potentially scoring more points. Lastly, @fig-variables-4 suggests a less steep yet positive correlation. While personal fouls are typically unwanted, they can be an indicator of aggressive play, which, depending on a player's role, may correlate with higher scoring if those players are also pivotal in offensive plays.
+Similarly, @fig-ageblk provides scatter plots that illustrate the relationships of age and blocks with points scored. I made a naive assumption that older players may score less than younger players, since in basketball, the physical demands on players can lead to a decline in performance as they age. Older players may score fewer points compared to their younger counterparts, primarily due to the cumulative effects of wear and tear on their bodies from multiple seasons of intense competition. This decline is often exacerbated by injuries that become more prevalent and harder to recover from with age. As players experience more seasons, the stress of high-intensity games can lead to persistent health issues, which may significantly impact their ability to maintain peak performance levels, particularly in scoring. However, @fig-ageblk-1 shows that there isn't a noticeable trend between age and points scored, which contradicts with my assumption. This could be due to the following reasons: first, as players age, they often adapt their playing style to stay competitive. Veterans might shift to roles that require less physical exertion or focus on aspects of the game that rely more on experience and skill rather than physicality. Secondly, modern training methods, diet, and medical treatments can prolong a player's peak performance. Players might maintain a high level of play longer than in the past due to better overall health and fitness management. Lastly, the most important factor could be that the cumulative knowledge and skills acquired from years of playing can help older players adapt and find new ways to score, effectively balancing out the physical challenges of aging. 
 
-The importance of these variables in predicting the number of points scored is underpinned by their direct and indirect contributions to a player's impact on the game. Minutes played directly increases opportunities for scoring, turnovers may indicate a player's involvement in high-risk, high-reward plays, total rebounds reflect on a player's capacity to create scoring opportunities, and personal fouls can be indicative of aggressive play styles that could also lead to scoring. These findings support the decision to include these variables in the predictive model because they play a significant role in predicting the number of points scored.
+Moreover, @fig-ageblk-2 shows that the relation between number of blocks and points scored is weak, indicating that some players have different roles than others, which may focus on defenses and assistance rather than scoring. 
 
 # Discussion {#sec-discussion}
 
@@ -626,7 +634,7 @@ tbl4 <- raw_data |>
 tbl4
 ```
 
-1. rk: rank - this doesn't represent the ranking of players based on some criterion, but purely for numbering purpose
+1. id: rank - this doesn't represent the ranking of players based on some criterion, but purely for numbering purpose
 2. player: player - the name of the basketball player.
 
 3. pos: position - the playing position of the player.
@@ -691,4 +699,6 @@ tbl4
 
 # References
 
+
+weaknesses: position grouping; discussion: less important variables, like blk not served as scorer, age
 
