@@ -15,7 +15,7 @@ analysis_data <- read_parquet("data/analysis_data/analysis_data.parquet")
 
 # Test Data Types
 test_that("Data types are correct", {
-  expect_type(analysis_data$player, "character")
+  expect_type(analysis_data$id, "integer")
   expect_type(analysis_data$age, "double")
   expect_type(analysis_data$g, "double")
   expect_type(analysis_data$gs, "double")
@@ -27,7 +27,6 @@ test_that("Data types are correct", {
   expect_type(analysis_data$ft_percent, "double")
   expect_type(analysis_data$orb, "double")
   expect_type(analysis_data$drb, "double")
-  expect_type(analysis_data$trb, "double")
   expect_type(analysis_data$ast, "double")
   expect_type(analysis_data$stl, "double")
   expect_type(analysis_data$blk, "double")
@@ -51,12 +50,12 @@ test_that("Total number of observations is correct", {
 
 # Test Total Number of variables
 test_that("Total number of variables is correct", {
-  expect_equal(ncol(analysis_data), 20)
+  expect_equal(ncol(analysis_data), 19)
 })
 
 # Test no NA values
 test_that("There are no missing values in key columns", {
-  expect_true(all(!is.na(analysis_data$player)))
+  expect_true(all(!is.na(analysis_data$id)))
   expect_true(all(!is.na(analysis_data$age)))
   expect_true(all(!is.na(analysis_data$g)))
   expect_true(all(!is.na(analysis_data$gs)))
@@ -68,7 +67,6 @@ test_that("There are no missing values in key columns", {
   expect_true(all(!is.na(analysis_data$ft_percent)))
   expect_true(all(!is.na(analysis_data$orb)))
   expect_true(all(!is.na(analysis_data$drb)))
-  expect_true(all(!is.na(analysis_data$trb)))
   expect_true(all(!is.na(analysis_data$ast)))
   expect_true(all(!is.na(analysis_data$stl)))
   expect_true(all(!is.na(analysis_data$blk)))
