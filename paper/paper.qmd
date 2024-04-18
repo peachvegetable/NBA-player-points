@@ -6,7 +6,7 @@ author:
 thanks: "Code and data are available at: https://github.com/peachvegetable/NBA-player-points"
 date: today
 date-format: long
-abstract: "This study applies lasso regression to predict NBA players' total points from performance metrics during the 2023-2024 season, focusing on variables such as minutes played, turnovers, and personal fouls. It was found that not only expected predictors like minutes played but also turnovers significantly affect scoring outcomes, indicating that players who engage more in the game, despite committing turnovers, tend to score higher. These insights emphasize the complex interplay between aggressive playing styles and scoring achievements. This research enriches our understanding of player performance dynamics, providing valuable knowledge for team management, player assessment, and the broader field of sports analytics."
+abstract: "This paper investigates the predictive capacity of lasso regression in determining NBA players' total points from season statistics. The study found that minutes played, turnovers, and personal fouls are significant predictors of scoring, with turnovers unexpectedly indicating a higher involvement in gameplay leading to increased scoring. The implications of these findings extend beyond sports analytics, suggesting that player evaluations in team sports may benefit from a deeper understanding of player involvement as opposed to conventional performance metrics. By refining predictive models and reassessing performance indicators, this research offers new insights into effective player performance assessment and strategic planning in professional basketball."
 format: pdf
 number-sections: true
 toc: true
@@ -467,6 +467,20 @@ ggplot(analysis_data, aes(x = tov, y = pts)) +
 
 The importance of these variables in predicting the number of points scored is underpinned by their direct and indirect contributions to a player's impact on the game. Minutes played directly increases opportunities for scoring, and turnovers may indicate a player's involvement in high-risk, high-reward plays. These findings support the decision to include these variables in the predictive model because they play a significant role in predicting the number of points scored.
 
+# Discussion {#sec-discussion}
+
+The ability to predict player performance metrics in sports is a critical aspect of team management and strategy development. In this paper, we've created a model that accurately forecasts NBA players' total points using a variety of performance metrics.
+
+## Model summary and modifications
+
+In this paper, we have applied a lasso regression model, a recognized method in statistics, to estimate the total points scored by NBA players from their performance statistics. This approach was selected for its ability to handle numerous predictors and its efficiency in shrinking less relevant predictors' coefficients towards zero, thus simplifying the model.
+
+We refined the model through feature engineering, a crucial step in which we derived new variables such as points per minute played, turnovers per game, and personal fouls per game. These variables were specifically constructed to capture the efficiency and impact of a player’s performance relative to their time on the court and their involvement in the game. Moreover, we addressed the issue of negative predictions—impossible in the real-world context of point scoring—by setting a floor value of zero. While these modifications led to improvements in predictive accuracy, they also introduced certain limitations that we'll discuss subsequently.
+
+## Key Predictive Variables
+
+Our findings reveal that minutes played, turnovers, total rebounds, and personal fouls hold substantial predictive power for determining a player's total points. These variables contribute significantly to a player’s performance score, with minutes played emerging as a particularly potent predictor as shown in @sec-results. This aligns with the intuitive understanding that more time on the court allows for more opportunities to score. However, apart from the key predictors we've discussed through the whole paper, let's explore those less important variables.
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -497,27 +511,13 @@ ggplot(analysis_data, aes(x = blk, y = pts)) +
   theme_minimal()
 ```
 
-Similarly, @fig-ageblk provides scatter plots that illustrate the relationships of age and blocks with points scored. I made a naive assumption that older players may score less than younger players, since in basketball, the physical demands on players can lead to a decline in performance as they age. Older players may score fewer points compared to their younger counterparts, primarily due to the cumulative effects of wear and tear on their bodies from multiple seasons of intense competition. This decline is often exacerbated by injuries that become more prevalent and harder to recover from with age. As players experience more seasons, the stress of high-intensity games can lead to persistent health issues, which may significantly impact their ability to maintain peak performance levels, particularly in scoring. However, @fig-ageblk-1 shows that there isn't a noticeable trend between age and points scored, which contradicts with my assumption. This could be due to the following reasons: first, as players age, they often adapt their playing style to stay competitive. Veterans might shift to roles that require less physical exertion or focus on aspects of the game that rely more on experience and skill rather than physicality. Secondly, modern training methods, diet, and medical treatments can prolong a player's peak performance. Players might maintain a high level of play longer than in the past due to better overall health and fitness management. Lastly, the most important factor could be that the cumulative knowledge and skills acquired from years of playing can help older players adapt and find new ways to score, effectively balancing out the physical challenges of aging. 
+Similar with @fig-variables, @fig-ageblk provides scatter plots that illustrate the relationships of age and blocks with points scored. I made a naive assumption that older players may score less than younger players, since in basketball, the physical demands on players can lead to a decline in performance as they age. Older players may score fewer points compared to their younger counterparts, primarily due to the cumulative effects of wear and tear on their bodies from multiple seasons of intense competition. This decline is often exacerbated by injuries that become more prevalent and harder to recover from with age. As players experience more seasons, the stress of high-intensity games can lead to persistent health issues, which may significantly impact their ability to maintain peak performance levels, particularly in scoring. However, @fig-ageblk-1 shows that there isn't a noticeable trend between age and points scored, which contradicts with my assumption. This could be due to the following reasons: first, as players age, they often adapt their playing style to stay competitive. Veterans might shift to roles that require less physical exertion or focus on aspects of the game that rely more on experience and skill rather than physicality. Secondly, modern training methods, diet, and medical treatments can prolong a player's peak performance. Players might maintain a high level of play longer than in the past due to better overall health and fitness management. Lastly, the most important factor could be that the cumulative knowledge and skills acquired from years of playing can help older players adapt and find new ways to score, effectively balancing out the physical challenges of aging. 
 
-Moreover, @fig-ageblk-2 shows that the relation between number of blocks and points scored is weak, indicating that some players have different roles than others, which may focus on defenses and assistance rather than scoring. 
-
-# Discussion {#sec-discussion}
-
-The ability to predict player performance metrics in sports is a critical aspect of team management and strategy development. In this paper, we've created a model that accurately forecasts NBA players' total points using a variety of performance metrics.
-
-## Model summary and modifications
-
-In this paper, we have applied a lasso regression model, a recognized method in statistics, to estimate the total points scored by NBA players from their performance statistics. This approach was selected for its ability to handle numerous predictors and its efficiency in shrinking less relevant predictors' coefficients towards zero, thus simplifying the model.
-
-We refined the model through feature engineering, a crucial step in which we derived new variables such as points per minute played, turnovers per game, and personal fouls per game. These variables were specifically constructed to capture the efficiency and impact of a player’s performance relative to their time on the court and their involvement in the game. Moreover, we addressed the issue of negative predictions—impossible in the real-world context of point scoring—by setting a floor value of zero. While these modifications led to improvements in predictive accuracy, they also introduced certain limitations that we'll discuss subsequently.
-
-## Key Predictive Variables
-
-Our findings reveal that minutes played, turnovers, total rebounds, and personal fouls hold substantial predictive power for determining a player's total points. These variables contribute significantly to a player’s performance score, with minutes played emerging as a particularly potent predictor. This aligns with the intuitive understanding that more time on the court allows for more opportunities to score.
+Moreover, @fig-ageblk-2 shows that the relationship between the number of blocks and points scored is weak, indicating that some players have roles that focus more on defense and assists rather than scoring.
 
 ## Weaknesses
 
-The study's methodology presents several weaknesses. Firstly, the potential non-linear relationships between some predictors and the total points scored are not fully captured by the lasso regression model. This could lead to an oversimplification of the complex dynamics of basketball performance. Secondly, the method of setting negative predictions to zero, though it ensures realistic prediction values, might reduce the model's accuracy as it deviates from true statistical adjustments, such as those achievable through log transformation. Thirdly, limiting the analysis to data points below a threshold of 1000 points may obscure the model's performance at the higher end of the spectrum. Lastly, the removal of the 'tm' (team) variable could ignore the potential change of players' performance across different teams, potentially affecting model's prediction.
+The study's methodology presents several weaknesses. Firstly, the potential non-linear relationships between some predictors and the total points scored are not fully captured by the lasso regression model. This could lead to an oversimplification of the complex dynamics of basketball performance. Secondly, the method of setting negative predictions to zero, although it ensures realistic prediction values, it might reduce the model's accuracy as it deviates from true statistical adjustments, such as those achievable through log transformation. However, log transformation brings more uncertainties to the prediction as applying the logarithm function to points can modify how points relate to other predictors, which in turn might decrease the precision of the model’s predictions. Thirdly, making a more general grouping of positions can simplify the model and avoid making unnecessary dummy variables, but it also risks oversimplifying the distinct roles of each position, which could improve the model’s performance if considered more carefully. Lastly, leaving out the 'tm' (team) variable fails to account for how changes in team context might influence a player's performance, potentially skewing the model’s predictive power.
 
 ## Next steps
 
