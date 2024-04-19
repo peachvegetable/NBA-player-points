@@ -24,7 +24,12 @@ cleaned_data <-
     pos %in% c("SG", "PG", "SG-PG", "PG-SG") ~ "G",  # Guard
     pos %in% c("SF", "PF", "PF-SF", "SF-PF", "SF-SG") ~ "F",  # Forward
     pos %in% c("C", "PF-C", "C-PF") ~ "C"
-    )
+    ),
+    fg_percent = fg_percent * 100,
+    x3p_percent = x3p_percent * 100,
+    x2p_percent = x2p_percent * 100,
+    e_fg_percent = e_fg_percent * 100,
+    ft_percent = ft_percent * 100
   ) |>
   select(-player, -rk, -tm, -pos, -fg, -fga, -x3p, -x3pa, -x2p, -x2pa, -ft, -fta, -trb) |>
   mutate(id = row_number()) |> # assigning identifier for each player (treating the same player in a different team a different player)

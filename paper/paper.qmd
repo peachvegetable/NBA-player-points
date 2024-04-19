@@ -1,6 +1,6 @@
 ---
 title: "More Minutes, More Points — The Role of Aggressive Play in NBA Scoring Trends"
-subtitle: "An Analysis of NBA Player Performance Using Lasso Regression for the 2023-2024 Season"
+subtitle: "An Analysis of NBA Player Performance, 2023-2024 Season"
 author: 
   - Yihang  Cai
 thanks: "Code and data are available at: https://github.com/peachvegetable/NBA-player-points"
@@ -22,7 +22,6 @@ bibliography: references.bib
 library(tidyverse)
 library(arrow)
 library(tidymodels)
-library(modelsummary)
 library(ggplot2)
 library(knitr)
 library(janitor)
@@ -63,7 +62,7 @@ This dataset comprises statistics for players, such as 3-point goals, 2-point go
 #| warning: false
 #| message: false
 #| label: tbl-top5players
-#| tbl-cap: Top 5 NBA Players Based on Select Predictors Highly Correlated with Points Scored, Season 2023-2024
+#| tbl-cap: "Top 5 NBA Players by Predictors Highly Correlated with Points, 2023-2024 Season"
 
 # read in the raw_data
 raw_data <- read_csv("../data/raw_data/raw_data.csv")
@@ -95,7 +94,7 @@ Additionally, I re-evaluated the necessity of certain variables such as 'trb' (t
 #| warning: false
 #| message: false
 #| label: tbl-top10players
-#| tbl-cap: Top 10 NBA Players with selectely statistics, Season 2023-2024
+#| tbl-cap: Top 10 NBA Players by selected statistics, Season 2023-2024
 
 # read in the analysis_data
 analysis_data <- read_parquet("../data/analysis_data/analysis_data.parquet")
@@ -108,11 +107,10 @@ analysis_data |>
     'x3p%' = x3p_percent,
     'x2p%' = x2p_percent,
     'efg%' = e_fg_percent,
-    'fg%' = fg_percent,
     'ft%' = ft_percent,
     'pos' = broad_position
   ) |>
-  kable(digits = 0)
+  kable(digits = 1)
 ```
 
 As illustrated in @tbl-top10players, aside from 'id' serving as an identifier, the selected variables are central to our analysis. These will act as predictors for estimating a player's total points, considering factors such as 3-point goal percentage, position, among others. Furthermore, for enhanced clarity, the values in the tables have been formatted to display only integers, since it is unlikely to have 0.3 point in scoring in basketball.
@@ -698,7 +696,4 @@ tbl4
 
 
 # References
-
-
-weaknesses: position grouping; discussion: less important variables, like blk not served as scorer, age
 
