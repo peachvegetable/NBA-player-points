@@ -41,9 +41,9 @@ The findings highlight that common metrics like minutes played are significant p
 
 These insights are vital for team strategies and player assessments and broaden the application of statistical models in sports science. They offer both theoretical and applied insights into the complex dynamics of basketball performance.
 
-The estimand of this study, the total points a player scores, is predicted based on various processed performance metrics using lasso regression. This focus is crucial to achieving the study's goals of enhancing predictive precision and understanding how different metrics influence scoring in NBA games.
+The estimand of this study, the total points a player scores, is predicted based on various processed performance metrics using lasso regression. This focus is importnat to achieving the study's goals of enhancing predictive precision and understanding how different metrics influence scoring in NBA games.
 
-The paper is structured as follows: @sec-data covers the data collection and preparation methods; @sec-model explains the model setup, justification, and evaluation of its performance; @sec-results discusses the results; and @sec-discussion interprets these results comprehensively. Appendix provides additional data details, rounding out the discussion and ensuring thorough documentation of all methods and analyses used.
+The paper is structured as follows: @sec-data covers the data collection and preparation methods; @sec-model explains the model setup, justification, and evaluation of its performance; @sec-results discusses the results; and @sec-discussion interprets these results in detail. Appendix provides additional data details, rounding out the discussion and ensuring thorough documentation of all methods and analyses used.
 
 # Data {#sec-data}
 
@@ -475,7 +475,7 @@ The ability to predict player performance metrics in sports is a critical aspect
 
 In this paper, we have applied a lasso regression model, a recognized method in statistics, to estimate the total points scored by NBA players from their performance statistics. This approach was selected for its ability to handle numerous predictors and its efficiency in shrinking less relevant predictors' coefficients towards zero, thus simplifying the model.
 
-We refined the model through feature engineering, a crucial step in which we derived new variables such as points per minute played, turnovers per game, and personal fouls per game. These variables were specifically constructed to capture the efficiency and impact of a player’s performance relative to their time on the court and their involvement in the game. Moreover, we addressed the issue of negative predictions—impossible in the real-world context of point scoring—by setting a floor value of zero. While these modifications led to improvements in predictive accuracy, they also introduced certain limitations that we'll discuss subsequently.
+We refined the model through feature engineering, a significant step in which we derived new variables such as points per minute played, turnovers per game, and personal fouls per game. These variables were specifically constructed to capture the efficiency and impact of a player’s performance relative to their time on the court and their involvement in the game. Moreover, we addressed the issue of negative predictions—impossible in the real-world context of point scoring—by setting a floor value of zero. While these modifications led to improvements in predictive accuracy, they also introduced certain limitations that we'll discuss subsequently.
 
 ## Key Predictive Variables
 
@@ -521,7 +521,7 @@ The study's methodology presents several weaknesses. Firstly, the potential non-
 
 ## Next steps
 
-To build upon this study's foundation, future research should consider incorporating data from multiple seasons to provide a more robust training set for the model, potentially capturing more subtle patterns in player performance over time. Including the 'tm' variable in the analysis might offer insights into how team dynamics influence individual performance. Further exploration into non-linear modeling techniques could also better accommodate the complex relationships within the data.
+To build upon this study's foundation, future research should consider incorporating data from multiple seasons to provide a stronger training set for the model, potentially capturing more subtle patterns in player performance over time. Including the 'tm' variable in the analysis might offer insights into how team dynamics influence individual performance. Further exploration into non-linear modeling techniques could also better accommodate the complex relationships within the data.
 
 \newpage
 

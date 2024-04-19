@@ -2,7 +2,8 @@
 
 ## Overview
 
-This repo provides a study on prediction of NBA players' points in season 2023 to 2024.
+This repo provides all neccessary files to conduct a study on prediction of NBA players' points in season 2023 to 2024.
+To replicate this study, run the scripts in the 'scripts' file in order from 01 to 04.
 
 
 ## File Structure

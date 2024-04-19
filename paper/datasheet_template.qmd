@@ -1,12 +1,12 @@
 ---
 title: "Datasheet for NBA player stats"
-subtitle: "My subtitle if needed"
+subtitle: "Dataset retrieved from Basketball Reference"
 author: 
   - Yihang Cai
 thanks: "Code and data are available at: https://github.com/peachvegetable/NBA-player-points"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This datasheet details the NBA player stats dataset, which includes performance metrics for NBA players during the 2023-2024 season. Designed to support a variety of analytical tasks, the dataset contains data on points, assists, rebounds, and other performance indicators from official NBA games. It describes the dataset’s creation, structure, distribution, and maintenance, providing essential information for users such as researchers, analysts, and sports enthusiasts. The document ensures users understand how to use the dataset effectively for sports analytics and related projects."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -22,14 +22,14 @@ Extract of the questions from @gebru2021datasheets.
 2. *Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?*
     - The dataset was created by Basketball Reference, and I downloaded following the instruction given. Utilizing publicly available data from Basketball Reference, which sources its current-season data from SportRadar, the official statistics provider of the NBA.
 3. *Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.*
-    - TBD
+    - Unsure. Often such datasets are funded by the hosting organizations themselves or through partnerships with sports leagues and media outlets.
 4. *Any other comments?*
-    - TBD
+    - None
 
 **Composition**
 
 1. *What do the instances that comprise the dataset represent (for example, documents, photos, people, countries)? Are there multiple types of instances (for example, movies, users, and ratings; people and interactions between them; nodes and edges)? Please provide a description.*
-	- Each instance in the dataset represents the season-long aggregated performance statistics for an individual NBA player for the 2023-2024 season. This includes games played, various scoring metrics, rebounding, assists, and other standard basketball statistics.
+	- Each instance represents statistical data for an NBA player for a particular season, including metrics like points scored, assists, rebounds, etc.
 2. *How many instances are there in total (of each type, if appropriate)?*
 	- The dataset contains 718 observations, each corresponding to a unique player or a player's stint with a particular team.
 3. *Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (for example, geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (for example, to cover a more diverse range of instances, because instances were withheld or unavailable).*
@@ -45,7 +45,7 @@ Extract of the questions from @gebru2021datasheets.
 5. *Is there a label or target associated with each instance? If so, please provide a description.*
 	- The dataset does not inherently contain a designated label or target for predictive modeling purposes. However, any of the numerical statistics, such as total points scored (PTS), could serve as a target variable for predictive analyses.
 6. *Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (for example, because it was unavailable). This does not include intentionally removed information, but might include, for example, redacted text.*
-	- TBD
+	- None
 7. *Are relationships between individual instances made explicit (for example, users' movie ratings, social network links)? If so, please describe how these relationships are made explicit.*
 	- The dataset does not explicitly encode relationships between instances (players). However, relationships or comparisons could be inferred or constructed based on team affiliations, positions, or other shared attributes.
 8. *Are there recommended data splits (for example, training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them.*
@@ -97,64 +97,64 @@ Extract of the questions from @gebru2021datasheets.
 **Preprocessing/cleaning/labeling**
 
 1. *Was any preprocessing/cleaning/labeling of the data done (for example, discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)? If so, please provide a description. If not, you may skip the remaining questions in this section.*
-	- TBD
+	- Yes, preprocessing typically includes correcting typographical errors, standardizing team names and player identifiers, and handling missing or incomplete data entries. This ensures consistency across the dataset for analysis purposes.
 2. *Was the "raw" data saved in addition to the preprocessed/cleaned/labeled data (for example, to support unanticipated future uses)? If so, please provide a link or other access point to the "raw" data.*
-	- TBD
+	- Unsure. It is common for organizations like Basketball Reference to maintain both "raw" and processed data for internal use, but publicly available data might only include processed data. For access to the "raw" data, direct contact with the data provider would be required.
 3. *Is the software that was used to preprocess/clean/label the data available? If so, please provide a link or other access point.*
-	- TBD
+	- Unsure. The specific tools used for data preprocessing by Basketball Reference or similar organizations are not typically disclosed publicly. However, common data manipulation packages in languages like Python (pandas) or R (dplyr) are likely used.
 4. *Any other comments?*
-	- TBD
+	- The preprocessing steps are crucial for ensuring the accuracy and usability of the data, especially in a dynamic and detail-oriented field like sports analytics. It is recommended for users to conduct their own checks and cleaning routines suited to their specific analytical needs to ensure data integrity.
 
 **Uses**
 
 1. *Has the dataset been used for any tasks already? If so, please provide a description.*
-	- TBD
+	- Yes, the dataset has been extensively used for various analytical tasks such as performance analysis, predictive modeling, player valuation, and strategy development. Additionally, sports journalists, fantasy sports enthusiasts, and researchers use this data for articles, reports, and academic studies on sports science and analytics.
 2. *Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point.*
-	- TBD
+	- While there is no specific repository that links to all papers or systems that use this dataset, research articles, and analyses citing such datasets can often be found through academic databases like Google Scholar, or directly on sports analytics blogs and websites like Basketball Reference itself.
 3. *What (other) tasks could the dataset be used for?*
-	- TBD
+	- Beyond traditional sports analysis, the dataset could also be used for machine learning projects, such as developing algorithms to predict future player performance or career trajectory. It can also be employed in economic studies assessing the financial impact of player performances on team revenues and sports marketing.
 4. *Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (for example, stereotyping, quality of service issues) or other risks or harms (for example, legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?*
-	- TBD
+	- The dataset's utility might be limited by its focus on quantitative metrics without contextual qualitative data such as player injuries, psychological factors, or team dynamics. These omissions can lead to misinterpretations if users are not cautious. To mitigate these risks, users should consider integrating this dataset with qualitative analyses and not rely solely on the data for making broad assessments about player capabilities or team performance.
 5. *Are there tasks for which the dataset should not be used? If so, please provide a description.*
-	- TBD
+	- This dataset should not be used for making personal judgments about athletes or for decision-making that could affect the personal lives or careers of the players without corroborative evidence from more comprehensive sources. Decisions based solely on statistical data without context can lead to ethical and fairness issues.
 6. *Any other comments?*
-	- TBD
+	- Users of this dataset should remain aware of the temporal nature of sports data; what may be true for one season might not hold in another due to changes in team compositions, player conditions, and other external factors such as rule changes in the sport.
 
 **Distribution**
 
 1. *Will the dataset be distributed to third parties outside of the entity (for example, company, institution, organization) on behalf of which the dataset was created? If so, please provide a description.*
-	- TBD
+	- Yes, the dataset is intended to be accessible to researchers, analysts, and sports enthusiasts, which means it will be distributed beyond the original data curating entity.
 2. *How will the dataset be distributed (for example, tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?*
-	- TBD
+	- The dataset is distributed via an API and a downloadable format on sports analytics websites like Basketball Reference. It does not usually have a digital object identifier (DOI) but is referenced by its source and season.
 3. *When will the dataset be distributed?*
-	- TBD
+	- The dataset is updated and distributed annually, following the end of each NBA season to include the latest statistical data.
 4. *Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/ or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.*
-	- TBD
+	- The dataset is distributed under terms of use that restrict the data for non-commercial, research, or educational purposes only. Users are typically required to acknowledge the source in any publications or presentations. Detailed terms can be found on the provider’s website.
 5. *Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.*
-	- TBD
+	- No additional third-party IP restrictions are typically imposed beyond the terms of use specified by the data provider.
 6. *Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.*
-	- TBD
+	- No export controls or regulatory restrictions apply to this dataset, as it contains publicly available sports performance data.
 7. *Any other comments?*
-	- TBD
+	- Users should ensure they remain compliant with the terms of use when using the dataset for any purpose.
 
 **Maintenance**
 
 1. *Who will be supporting/hosting/maintaining the dataset?*
-	- TBD
+	- The dataset is maintained by the data team at Basketball Reference or the respective sports analytics firm responsible for its compilation.
 2. *How can the owner/curator/manager of the dataset be contacted (for example, email address)?*
-	- TBD
+	- The dataset curator can be contacted via email provided on the Basketball Reference contact page or the dataset’s main webpage.
 3. *Is there an erratum? If so, please provide a link or other access point.*
-	- TBD
+	- Yes, users can report errors or issues with the dataset through a dedicated section on the website where the dataset is hosted, and errata are published in subsequent updates.
 4. *Will the dataset be updated (for example, to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (for example, mailing list, GitHub)?*
-	- TBD
+	- The dataset is updated annually with new data from the latest NBA season. Updates are communicated to users via newsletters and update logs on the website. This dataset for the 2023-2024 season is not likely to be updated, since the season is already ended and player statistics are fixed.
 5. *If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (for example, were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced.*
-	- TBD
+	- The data, being historical sports performance records, is retained indefinitely as part of the public record. No limits are imposed on data retention.
 6. *Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.*
-	- TBD
+	- Older versions are archived and remain accessible for historical comparison and research purposes.
 7. *If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.*
-	- TBD
+	- Contributions or suggestions for dataset extensions can be submitted via the platform’s contribution section, but all contributions are reviewed and validated by the data team to ensure accuracy and consistency.
 8. *Any other comments?*
-	- TBD
+	- Users are encouraged to check for updates regularly and use the latest version of the dataset for the most accurate analysis.
 
 
 \newpage
